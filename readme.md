@@ -1,4 +1,4 @@
-## NO MORE SLIDING WINDOW: EFFICIENT 3D MEDICAL IMAGE SEGMENTATION WITH DIFFERENTIABLE TOP-K PATCH SAMPLING
+## [MICCAI-2025] NO MORE SLIDING WINDOW: EFFICIENT 3D MEDICAL IMAGE SEGMENTATION WITH DIFFERENTIABLE TOP-K PATCH SAMPLING
 
 We introduce, for the first time in the community, a computationally efficient full-res CT/MRI segmentation framework, called the No-More-Sliding-Window (NMSW) which replaces the costly SW inference with a differentiable patch sampling module that learns to sample only a handful of patches of higher importance. NMSW aggregates the predictions from the selected patches with a low-res global prediction to produce the final full-res whole-volume prediction.
 
