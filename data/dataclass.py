@@ -7,14 +7,19 @@ from toolz.curried.operator import *
 
 from monai.data.dataset import (
     PersistentDataset,  # if not this, though slower its not constrained by RAM size.
+    Dataset
 )
 
-from data.augmentation import aug
+from data.augmentation import aug, aug_brats
 from data.registry import data_registry
 from utils.definitions import *
 
+from sklearn.model_selection import train_test_split
+
 from operator import methodcaller as mc
 import json
+import os
+import regex as re
 
 __all__ = ["Word"]
 
@@ -206,6 +211,149 @@ class DecathlonNSWDataset(DecathlonDataset):
             *args,
             **kwargs,
         )
+
+class BraTS2021Dataset(Dataset):
+    dataset_name: str
+    global_downsize_rate: list[int]
+    local_roi_size: list[int]
+    global_roi_size: list[int]
+    global_divisible_k: list[int]
+    intensity_scale: list[float]
+    spacing: list[float]
+    do_deform: bool
+    new_label_rule: dict[str, list[str]] | None = None
+    prior_path: None | Path = None
+    samping_proportion: None | list[float] = None
+    orientation_mode: str = "RAS"
+
+    transform = None
+    root_dir: Path = Path(__file__).resolve().parent / "datasets/"
+    vol_key: str = ["t1", "t1ce", "t2", "flair"]
+    lab_key: str = "seg"
+    source_key: str = "flair"
+    case_id_key: str = "case_id"
+    vols_to_exclude: list[str] = []
+    dataset_json_filename: str = "dataset.json"
+
+    def __init__(
+        self, 
+        mode, 
+        data_dir,
+        rand_aug_type: str = ["none", "light", "heavy"][-1]
+    ):
+        self.mode = mode
+        self.data_dir = data_dir
+        self.rand_aug_type = rand_aug_type
+
+        assert mode in [TRAIN, VALID, TEST], "mode must be 'train', 'valid', or 'test'"
+
+        self.datas = self.load_data_pair()
+
+        self.old_label_rule = load_val_from_json(
+            "labels", os.path.join(self.root_dir, self.data_dir, self.dataset_json_filename)
+        )
+        self.labels = (
+            list(self.new_label_rule.keys())
+            if self.new_label_rule != None
+            else self.old_label_rule
+        )
+        
+        self.num_classes = len(self.labels)
+        self.num_channels = len(self.datas[0]) - 2
+
+        transform = aug_brats(
+            spacing=self.spacing,
+            local_roi_size=self.local_roi_size,
+            global_roi_size=self.global_roi_size,
+            intensity_scale=self.intensity_scale,
+            old_label_rule=self.old_label_rule,
+            new_label_rule=self.new_label_rule,
+            global_divisible_k=self.global_divisible_k,
+            orientation_mode=self.orientation_mode,
+            rand_aug_type=rand_aug_type if mode == TRAIN else "none",
+            do_deform=self.do_deform,
+            vol=self.vol_key,
+            lab=self.lab_key,
+            source=self.source_key,
+        )
+
+        super().__init__(self.datas, transform)
+
+    def load_data_pair(self):
+        if os.path.exists(os.path.join(self.root_dir, self.data_dir, self.dataset_json_filename)):
+            datas = load_val_from_json(
+                keys=self.mode,
+                json_path=os.path.join(self.root_dir, self.data_dir, self.dataset_json_filename)
+            )
+        else:
+            datas = self.parse_pair_fn()
+
+        return datas
+    
+    def parse_pair_fn(self):
+        labels = {
+            "0": "Background",
+            "1": "NCR/NET",
+            "2": "ED",
+            "4": "ET",
+        }
+
+        datas = []
+        sources = []
+        
+        for (root, dirs, files) in os.walk(os.path.join(self.root_dir, self.data_dir)):
+            if files:
+                data = {}
+                for file in files:
+                    if file.endswith(".nii.gz"):
+                        data[re.search(r"(?<=_)[^_]*?(?=.nii.gz)", file, flags=re.DOTALL).group()] = os.path.join(re.search(r"[^/]*$", root).group(0), file).replace("\\", "/")
+                if len(data) == 5:
+                    data["case_id"] = re.search(r"[^\\]*$", root).group(0)
+                    datas.append(data)
+                    sources.append(re.search(r"[^/]*(?=\\)", root, flags=re.DOTALL).group())
+
+        train, val, test = self._stratified_split(datas, sources)
+
+        numTraining = len(train)
+        numValidation = len(val)
+        numTesting = len(test)
+
+        jsonfile = {
+            "labels": labels,
+            "numTraining": numTraining,
+            "numValidation": numValidation,
+            "numTesting": numTesting,
+            "train": train,
+            "valid": val,
+            "test": test,
+        }
+
+        with open(os.path.join(self.root_dir, self.data_dir, self.dataset_json_filename), "w") as f:
+            json.dump(jsonfile, f, indent=4)
+        
+        return {
+            TRAIN: train,
+            VALID: val,
+            TEST: test,
+        }[self.mode]
+    
+    def _stratified_split(self, datas, sources):
+        train, val, train_sources, val_sources = train_test_split(datas, sources, test_size=0.4, random_state=42, stratify=sources)
+        val, test, val_sources, test_sources = train_test_split(val, val_sources, test_size=0.5, random_state=42, stratify=val_sources)
+
+        return train, val, test
+    
+
+@data_registry.register    
+class BraTS2021(BraTS2021Dataset):
+    dataset_name = "BraTS2021"
+    intensity_scale = [0.5, 99.5, 0.0, 1.0]
+    spacing = [1.0, 1.0, 1.0]
+    local_roi_size = [96, 96, 96]
+    global_roi_size = [170, 192, 160]
+    global_divisible_k = [16, 16, 16]
+    global_downsize_rate = [2, 2, 2]
+    do_deform = True
 
 
 @data_registry.register

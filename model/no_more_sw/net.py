@@ -134,6 +134,9 @@ class NSWNet3D(nn.Module):
             loss_args=global_loss,
         )
 
+        # self.local_backbone.compile(mode="max-autotune")
+        # self.global_backbone.compile(mode="max-autotune")
+
         # 2nd last
         pre_score_feature_shape = self.global_backbone.feature_shapes[-2]
 

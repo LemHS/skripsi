@@ -215,159 +215,160 @@ class Trainer(pl.LightningModule):
 def main(cfg: DictConfig):
 
     cfg = edict(OmegaConf.to_container(cfg, resolve=True))
+    print(cfg)
 
-    # load args and set states
-    ###################################################
-    set_seed(cfg.seed_number)
-    set_gpu(cfg.gpu_id)
+    # # load args and set states
+    # ###################################################
+    # set_seed(cfg.seed_number)
+    # set_gpu(cfg.gpu_id)
 
-    # Load Train & Test datasets
-    ###################################################
-    Dataset = data_registry[cfg.dataset_name]
+    # # Load Train & Test datasets
+    # ###################################################
+    # Dataset = data_registry[cfg.dataset_name]
 
-    train_dataset = Dataset(
-        mode=TRAIN,
-        rand_aug_type=cfg.rand_aug_type,
-        fold_n=cfg.fold,
-    )
+    # train_dataset = Dataset(
+    #     mode=TRAIN,
+    #     rand_aug_type=cfg.rand_aug_type,
+    #     fold_n=cfg.fold,
+    # )
 
-    train_loader = NSWDataLoader(
-        dataset=train_dataset,
-        iteration_per_epoch=cfg.train_iteration_per_epoch,
-        num_workers=cfg.num_workers,
-        batch_size=cfg.batch_size,
-    )
+    # train_loader = NSWDataLoader(
+    #     dataset=train_dataset,
+    #     iteration_per_epoch=cfg.train_iteration_per_epoch,
+    #     num_workers=cfg.num_workers,
+    #     batch_size=cfg.batch_size,
+    # )
 
-    valid_dataset = Dataset(
-        mode=VALID,
-        rand_aug_type=cfg.rand_aug_type,
-        fold_n=cfg.fold,
-    )
-    valid_loader = NSWDataLoader(
-        dataset=valid_dataset,
-        iteration_per_epoch=cfg.val_iteration_per_epoch,
-        num_workers=cfg.num_workers,
-        batch_size=cfg.batch_size,
-    )
+    # valid_dataset = Dataset(
+    #     mode=VALID,
+    #     rand_aug_type=cfg.rand_aug_type,
+    #     fold_n=cfg.fold,
+    # )
+    # valid_loader = NSWDataLoader(
+    #     dataset=valid_dataset,
+    #     iteration_per_epoch=cfg.val_iteration_per_epoch,
+    #     num_workers=cfg.num_workers,
+    #     batch_size=cfg.batch_size,
+    # )
 
-    test_dataset = Dataset(
-        mode=TEST,
-        rand_aug_type="none",  # placeholder, not used in test.
-        fold_n=cfg.fold,
-    )
+    # test_dataset = Dataset(
+    #     mode=TEST,
+    #     rand_aug_type="none",  # placeholder, not used in test.
+    #     fold_n=cfg.fold,
+    # )
 
-    test_loader = NSWDataLoader(
-        dataset=test_dataset,
-        iteration_per_epoch=None,  # We use the full test dataset
-        num_workers=cfg.num_workers,
-        batch_size=1,
-    )
+    # test_loader = NSWDataLoader(
+    #     dataset=test_dataset,
+    #     iteration_per_epoch=None,  # We use the full test dataset
+    #     num_workers=cfg.num_workers,
+    #     batch_size=1,
+    # )
 
-    # attach extra arguments from dataclass
-    ###################################################
-    cfg.label_keys = train_dataset.labels
-    cfg.num_classes = train_dataset.num_classes
-    cfg.num_channel = train_dataset.num_channel
-    cfg.down_size_rate = train_dataset.global_downsize_rate
-    cfg.patch_size = train_dataset.local_roi_size
-    cfg.input_shape = [cfg.num_channel] + train_dataset.global_roi_size
-    cfg.output_shape = [cfg.num_classes] + train_dataset.global_roi_size
+    # # attach extra arguments from dataclass
+    # ###################################################
+    # cfg.label_keys = train_dataset.labels
+    # cfg.num_classes = train_dataset.num_classes
+    # cfg.num_channel = train_dataset.num_channel
+    # cfg.down_size_rate = train_dataset.global_downsize_rate
+    # cfg.patch_size = train_dataset.local_roi_size
+    # cfg.input_shape = [cfg.num_channel] + train_dataset.global_roi_size
+    # cfg.output_shape = [cfg.num_classes] + train_dataset.global_roi_size
 
-    cfg.model.down_size_rate = train_dataset.global_downsize_rate
-    cfg.model.patch_size = train_dataset.local_roi_size
+    # cfg.model.down_size_rate = train_dataset.global_downsize_rate
+    # cfg.model.patch_size = train_dataset.local_roi_size
 
-    # tensorboard Logger
-    ###################################################
+    # # tensorboard Logger
+    # ###################################################
 
-    # callbacks
-    ###################################################
-    if cfg.model.name == "GlobalSeg3D":
-        ckpt_name = (
-            f"{cfg.dataset_name}_{cfg.model.name}_{cfg.model.global_backbone_name}"
-        )
-    else:
-        ckpt_name = (
-            f"{cfg.dataset_name}_{cfg.model.name}_{cfg.model.local_backbone_name}"
-        )
+    # # callbacks
+    # ###################################################
+    # if cfg.model.name == "GlobalSeg3D":
+    #     ckpt_name = (
+    #         f"{cfg.dataset_name}_{cfg.model.name}_{cfg.model.global_backbone_name}"
+    #     )
+    # else:
+    #     ckpt_name = (
+    #         f"{cfg.dataset_name}_{cfg.model.name}_{cfg.model.local_backbone_name}"
+    #     )
 
-    if cfg.model.name == "GlobalSeg3D":
-        log_file_name = (
-            f"{cfg.dataset_name}_{cfg.model.name}_{cfg.model.global_backbone_name}"
-        )
-    else:
-        log_file_name = (
-            f"{cfg.dataset_name}_{cfg.model.name}_{cfg.model.local_backbone_name}"
-        )
+    # if cfg.model.name == "GlobalSeg3D":
+    #     log_file_name = (
+    #         f"{cfg.dataset_name}_{cfg.model.name}_{cfg.model.global_backbone_name}"
+    #     )
+    # else:
+    #     log_file_name = (
+    #         f"{cfg.dataset_name}_{cfg.model.name}_{cfg.model.local_backbone_name}"
+    #     )
 
-    log_save_dir = f"{cfg.log_base_path}"
-    logger = TensorBoardLogger(log_save_dir, log_file_name, 0, default_hp_metric=True)
+    # log_save_dir = f"{cfg.log_base_path}"
+    # logger = TensorBoardLogger(log_save_dir, log_file_name, 0, default_hp_metric=True)
 
-    ckpt_callback1 = ModelCheckpoint(
-        dirpath=f"{cfg.ckpt_base_path}",
-        filename=ckpt_name,
-        monitor=(f"{VALID}/{TOTAL_LOSS}"),
-        save_top_k=1,
-        verbose=True,
-        mode="min",
-    )
+    # ckpt_callback1 = ModelCheckpoint(
+    #     dirpath=f"{cfg.ckpt_base_path}",
+    #     filename=ckpt_name,
+    #     monitor=(f"{VALID}/{TOTAL_LOSS}"),
+    #     save_top_k=1,
+    #     verbose=True,
+    #     mode="min",
+    # )
 
-    lr_monitor = LearningRateMonitor(logging_interval="step")
-    callbacks = [lr_monitor, ckpt_callback1]
+    # lr_monitor = LearningRateMonitor(logging_interval="step")
+    # callbacks = [lr_monitor, ckpt_callback1]
 
-    # ugly but lazy to change
-    if cfg.model.name == "NSWNet3D":
-        tau_reduction = ReducingTau(
-            starting_tau=cfg.model.starting_tau,
-            final_tau=cfg.model.final_tau,
-            reduction_mutiplier=cfg.model.reduction_mutiplier,
-        )
-        callbacks += [tau_reduction]
+    # # ugly but lazy to change
+    # if cfg.model.name == "NSWNet3D":
+    #     tau_reduction = ReducingTau(
+    #         starting_tau=cfg.model.starting_tau,
+    #         final_tau=cfg.model.final_tau,
+    #         reduction_mutiplier=cfg.model.reduction_mutiplier,
+    #     )
+    #     callbacks += [tau_reduction]
 
-    # profiler
-    ###################################################
-    profiler = PyTorchProfiler(
-        on_trace_ready=torch.profiler.tensorboard_trace_handler("logs/profiler0"),
-        schedule=torch.profiler.schedule(skip_first=10, wait=1, warmup=1, active=5),
-    )
+    # # profiler
+    # ###################################################
+    # profiler = PyTorchProfiler(
+    #     on_trace_ready=torch.profiler.tensorboard_trace_handler("logs/profiler0"),
+    #     schedule=torch.profiler.schedule(skip_first=10, wait=1, warmup=1, active=5),
+    # )
 
-    # init model and trainer
-    ###################################################
-    model = Trainer(cfg)
+    # # init model and trainer
+    # ###################################################
+    # model = Trainer(cfg)
 
-    trainer = pl.Trainer(
-        accelerator="gpu",
-        profiler=profiler if cfg.profile_debug else None,
-        precision=cfg.precision,
-        max_epochs=cfg.epoch,
-        logger=logger,
-        callbacks=callbacks,
-        check_val_every_n_epoch=cfg.check_val_every_n_epoch,
-        num_sanity_val_steps=0,
-        gradient_clip_val=1,
-        devices=1,
-        limit_train_batches=cfg.train_iteration_per_epoch,
-    )
+    # trainer = pl.Trainer(
+    #     accelerator="gpu",
+    #     profiler=profiler if cfg.profile_debug else None,
+    #     precision=cfg.precision,
+    #     max_epochs=cfg.epoch,
+    #     logger=logger,
+    #     callbacks=callbacks,
+    #     check_val_every_n_epoch=cfg.check_val_every_n_epoch,
+    #     num_sanity_val_steps=0,
+    #     gradient_clip_val=1,
+    #     devices=1,
+    #     limit_train_batches=cfg.train_iteration_per_epoch,
+    # )
 
-    # train, valid, and test
-    ###################################################
-    if not cfg.test_only:
-        trainer.fit(
-            model,
-            train_loader,
-            valid_loader,
-            ckpt_path=cfg.ckpt_path,
-        ),
-        trainer.test(
-            model,
-            [test_loader],
-            ckpt_path="best",
-        )
-    else:
-        trainer.test(
-            model,
-            [test_loader],
-            ckpt_path=cfg.ckpt_path,
-        )
+    # # train, valid, and test
+    # ###################################################
+    # if not cfg.test_only:
+    #     trainer.fit(
+    #         model,
+    #         train_loader,
+    #         valid_loader,
+    #         ckpt_path=cfg.ckpt_path,
+    #     ),
+    #     trainer.test(
+    #         model,
+    #         [test_loader],
+    #         ckpt_path="best",
+    #     )
+    # else:
+    #     trainer.test(
+    #         model,
+    #         [test_loader],
+    #         ckpt_path=cfg.ckpt_path,
+    #     )
 
 if __name__ == "__main__":
 

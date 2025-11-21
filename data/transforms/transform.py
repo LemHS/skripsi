@@ -434,6 +434,8 @@ class MergeLabelD(MapTransform):
 
         self.old_label_rule = old_label_rule
         self.new_label_rule = new_label_rule
+        
+        self.rev_old_label_rule = {v: k for k, v in old_label_rule.items()}
 
     def __call__(
         self, data: Mapping[Hashable, NdarrayOrTensor]
@@ -451,8 +453,12 @@ class MergeLabelD(MapTransform):
         if self.new_label_rule != None:
             lab_copy.array = np.zeros_like(lab)
             for new_index, labs in enumerate(self.new_label_rule.values()):
-                for lab_idx in map(self.old_label_rule.index)(labs):
-                    lab_copy[lab == lab_idx] = new_index
+                if isinstance(labs, list):
+                    for old_idx in map(self.rev_old_label_rule.get, labs):
+                        lab_copy[lab == int(old_idx)] = int(new_index)
+                else:
+                    old_idx = self.rev_old_label_rule.get(labs)
+                    lab_copy[lab == int(old_idx)] = int(new_index)
             del lab
 
         return lab_copy

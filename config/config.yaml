@@ -11,14 +11,14 @@ num_workers: 16
 fold: -1
 
 # training args
-precision: "32"  # full precision (32, '32' or '32-true'), 16bit mixed precision (16, '16', '16-mixed'), (bf16-mixed)
+precision: "16-mixed"  # full precision (32, '32' or '32-true'), 16bit mixed precision (16, '16', '16-mixed'), (bf16-mixed)
 rand_aug_type: "heavy"  # light | heavy
 seed_number: -1  # if -1 do not set seed
 epoch: 300
-train_iteration_per_epoch: 400 #400
-val_iteration_per_epoch: 30 # 100
+train_iteration_per_epoch: 500 #400
+val_iteration_per_epoch: 100 # 100
 check_val_every_n_epoch: 2 # s
-gpu_id: ???  # peaks the most free gpu when set to -1
+gpu_id: -1  # peaks the most free gpu when set to -1
 
 # path args
 log_base_path: "logs" 
