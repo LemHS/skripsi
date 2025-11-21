@@ -4,4 +4,16 @@ __pycache__/
 *.ipynb
 outputs/
 readme.md
-BraTS/
+
+data/datasets/BraTS/BraTS2021_TrainingSet/ACRIN-FMISO-Brain/
+data/datasets/BraTS/BraTS2021_TrainingSet/CPTAC-GBM/
+data/datasets/BraTS/BraTS2021_TrainingSet/IvyGAP/
+data/datasets/BraTS/BraTS2021_TrainingSet/new-not-previously-in-TCIA/
+data/datasets/BraTS/BraTS2021_TrainingSet/TCGA-GBM/
+data/datasets/BraTS/BraTS2021_TrainingSet/TCGA-LGG/
+data/datasets/BraTS/BraTS2021_TrainingSet/UCSF-PDGM/BraTS2021_*/
+data/datasets/BraTS/BraTS2021_TrainingSet/UPENN-GBM/
+
+!data/datasets/BraTS/BraTS2021_TrainingSet/UCSF-PDGM/BraTS2021_0000[0-9]/
+!data/datasets/BraTS/BraTS2021_TrainingSet/UCSF-PDGM/BraTS2021_000[1-4][0-9]/
+!data/datasets/BraTS/BraTS2021_TrainingSet/UCSF-PDGM/BraTS2021_00050/
