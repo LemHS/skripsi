@@ -14,6 +14,5 @@ data/datasets/BraTS/BraTS2021_TrainingSet/TCGA-LGG/
 data/datasets/BraTS/BraTS2021_TrainingSet/UCSF-PDGM/BraTS2021_*/
 data/datasets/BraTS/BraTS2021_TrainingSet/UPENN-GBM/
 
-!data/datasets/BraTS/BraTS2021_TrainingSet/UCSF-PDGM/BraTS2021_0000[0-9]/
-!data/datasets/BraTS/BraTS2021_TrainingSet/UCSF-PDGM/BraTS2021_000[1-4][0-9]/
+!data/datasets/BraTS/BraTS2021_TrainingSet/UCSF-PDGM/BraTS2021_000[5-9][0-9]/
 !data/datasets/BraTS/BraTS2021_TrainingSet/UCSF-PDGM/BraTS2021_00050/
