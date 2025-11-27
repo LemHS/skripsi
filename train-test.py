@@ -234,6 +234,7 @@ def main(cfg: DictConfig):
         root_dir="/kaggle/input" if cfg.kaggle else None,
         data_dir=f"{cfg.dataset_name}-{TRAIN}" if cfg.kaggle else None,
         cache_dir_name=f"{cfg.dataset_name}_{TRAIN}" if cfg.kaggle else None,
+        json_dir="/kaggle/input/brats-json" if cfg.kaggle else None,
     )
 
     train_loader = NSWDataLoader(
@@ -249,6 +250,7 @@ def main(cfg: DictConfig):
         root_dir="/kaggle/input" if cfg.kaggle else None,
         data_dir=f"{cfg.dataset_name}-{VALID}" if cfg.kaggle else None,
         cache_dir_name=f"{cfg.dataset_name}_{VALID}" if cfg.kaggle else None,
+        json_dir="/kaggle/input/brats-json" if cfg.kaggle else None,
     )
     valid_loader = NSWDataLoader(
         dataset=valid_dataset,
@@ -263,6 +265,7 @@ def main(cfg: DictConfig):
         root_dir="/kaggle/input" if cfg.kaggle else None,
         data_dir=f"{cfg.dataset_name}-{VALID}" if cfg.kaggle else None,
         cache_dir_name=f"{cfg.dataset_name}_{VALID}" if cfg.kaggle else None,
+        json_dir="/kaggle/input/brats-json" if cfg.kaggle else None,
     )
 
     test_loader = NSWDataLoader(

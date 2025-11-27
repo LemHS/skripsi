@@ -248,19 +248,21 @@ class BraTS2021Dataset(PersistentDataset):
         root_dir: str | Path = None,
         data_dir: str = None,
         cache_dir_name: str = None,
+        json_dir: str = None,
     ):
         self.mode = mode
         self.rand_aug_type = rand_aug_type
         self.root_dir = Path(root_dir) if root_dir is not None else self.root_dir
         self.data_dir = data_dir if data_dir is not None else self.data_dir
         self.cache_dir_name = cache_dir_name if cache_dir_name is not None else self.cache_dir_name
+        self.json_dir = json_dir if json_dir is not None else os.path.join(self.root_dir / "datasets/", self.data_dir, self.dataset_json_filename)
 
         assert mode in [TRAIN, VALID, TEST], "mode must be 'train', 'valid', or 'test'"
 
         self.datas = self.load_data_pair()
 
         self.old_label_rule = load_val_from_json(
-            "labels", os.path.join(self.root_dir / "datasets/", self.data_dir, self.dataset_json_filename)
+            "labels", self.json_dir
         )
         self.labels = (
             list(self.new_label_rule.keys())
@@ -292,10 +294,10 @@ class BraTS2021Dataset(PersistentDataset):
         super().__init__(self.datas, transform, cache_dir=cache_dir)
 
     def load_data_pair(self):
-        if os.path.exists(os.path.join(self.root_dir / "datasets/", self.data_dir, self.dataset_json_filename)):
+        if os.path.exists(self.json_dir):
             datas = load_val_from_json(
                 keys=self.mode,
-                json_path=os.path.join(self.root_dir / "datasets/", self.data_dir, self.dataset_json_filename)
+                json_path=self.json_dir
             )
         else:
             datas = self.parse_pair_fn()
