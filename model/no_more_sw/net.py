@@ -134,6 +134,9 @@ class NSWNet3D(nn.Module):
             loss_args=global_loss,
         )
 
+        # self.local_backbone.compile(mode="max-autotune")
+        # self.global_backbone.compile(mode="max-autotune")
+
         # 2nd last
         pre_score_feature_shape = self.global_backbone.feature_shapes[-2]
 
@@ -264,6 +267,8 @@ class NSWNet3D(nn.Module):
             num_topk_patches,
             mode=mode,
         )
+        freeze_local = getattr(self, "freeze_local_backbone", False)
+
         ###############LOCAL##################
         if mode == TRAIN:
             sampled_random_local_patches_d = {
@@ -278,9 +283,15 @@ class NSWNet3D(nn.Module):
             )
 
             # predict
-            sampled_patches_features: TensorType["BN", "C", "Hp", "Wp", "Dp"] = (
-                self.local_backbone(sampled_patches_d[VOL])
-            )
+            if freeze_local:
+                with torch.no_grad():
+                    sampled_patches_features: TensorType[
+                        "BN", "C", "Hp", "Wp", "Dp"
+                    ] = self.local_backbone(sampled_patches_d[VOL])
+            else:
+                sampled_patches_features: TensorType["BN", "C", "Hp", "Wp", "Dp"] = (
+                    self.local_backbone(sampled_patches_d[VOL])
+                )
             sampled_patches_logits = sampled_patches_features[-1]
 
             sampled_topk_patch_logits = sampled_patches_logits[
@@ -343,10 +354,18 @@ class NSWNet3D(nn.Module):
                 global_segmentation_logit,
                 global_input_d[LAB],
             )
-            local_loss: int = self.local_backbone.get_loss(
-                sampled_patches_logits,
-                sampled_patches_d[LAB],
-            )
+            
+            if freeze_local:
+                with torch.no_grad():
+                    local_loss: int = self.local_backbone.get_loss(
+                        sampled_patches_logits,
+                        sampled_patches_d[LAB],
+                    )
+            else:
+                local_loss: int = self.local_backbone.get_loss(
+                    sampled_patches_logits,
+                    sampled_patches_d[LAB],
+                )
             agg_loss: int = self.agg_loss_fn(
                 aggregated_logit,
                 input_d[LAB],
@@ -366,7 +385,7 @@ class NSWNet3D(nn.Module):
             total_loss = (
                 agg_loss
                 + global_loss
-                + local_loss
+                + (0 if freeze_local else local_loss)
                 - (entropy * self.entropy_multiplier)
             )
 

@@ -97,7 +97,7 @@ class VisVolLab:
                 raise RuntimeError(f"Both args:`imgs` and args:`labs` are not tensors.")
 
         return draw_segmentation_masks(
-            self._to_grid_vol(vol),
+            self._to_grid_vol(vol[0].unsqueeze(0)),
             self._to_grid_lab(lab.squeeze(0)),
             alpha=self.alpha,
             colors=["#000000"]  # set first label (most probably background) to black

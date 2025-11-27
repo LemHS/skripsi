@@ -63,7 +63,7 @@ class LearnablePatchAgg(nn.Module):
         # operations
         self.sigmoid = nn.Sigmoid()
         self.upsize_wt = Interpolate(size=self.patch_size)
-        self.upsize_global = Interpolate(scale_factor=self.down_size_rate)
+        self.upsize_global = Interpolate(size=self.vol_size)
         self.downsize_global = Interpolate(
             mode="nearest", scale_factor=list(1 / np.array(self.down_size_rate))
         )
@@ -102,7 +102,6 @@ class LearnablePatchAgg(nn.Module):
         mask = torch.zeros(batch_size, 1, *self.vol_size, device=global_logit.device)
         slicess = []
         for i, logit_patch in enumerate(logit_patches):
-
             batch_index = i // (len(slice_meta) // batch_size)
             slices: list[slice] = [slice(batch_index, batch_index + 1)] + eval(
                 logit_patch.meta["slice"]

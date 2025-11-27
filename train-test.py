@@ -225,10 +225,15 @@ def main(cfg: DictConfig):
     ###################################################
     Dataset = data_registry[cfg.dataset_name]
 
+    if cfg.new_label_rule != None:
+        Dataset.new_label_rule = cfg.new_label_rule
+
     train_dataset = Dataset(
         mode=TRAIN,
         rand_aug_type=cfg.rand_aug_type,
-        fold_n=cfg.fold,
+        root_dir="/kaggle/input" if cfg.kaggle else None,
+        data_dir=f"{cfg.dataset_name}-{TRAIN}" if cfg.kaggle else None,
+        cache_dir_name=f"{cfg.dataset_name}_{TRAIN}" if cfg.kaggle else None,
     )
 
     train_loader = NSWDataLoader(
@@ -241,7 +246,9 @@ def main(cfg: DictConfig):
     valid_dataset = Dataset(
         mode=VALID,
         rand_aug_type=cfg.rand_aug_type,
-        fold_n=cfg.fold,
+        root_dir="/kaggle/input" if cfg.kaggle else None,
+        data_dir=f"{cfg.dataset_name}-{VALID}" if cfg.kaggle else None,
+        cache_dir_name=f"{cfg.dataset_name}_{VALID}" if cfg.kaggle else None,
     )
     valid_loader = NSWDataLoader(
         dataset=valid_dataset,
@@ -253,7 +260,9 @@ def main(cfg: DictConfig):
     test_dataset = Dataset(
         mode=TEST,
         rand_aug_type="none",  # placeholder, not used in test.
-        fold_n=cfg.fold,
+        root_dir="/kaggle/input" if cfg.kaggle else None,
+        data_dir=f"{cfg.dataset_name}-{VALID}" if cfg.kaggle else None,
+        cache_dir_name=f"{cfg.dataset_name}_{VALID}" if cfg.kaggle else None,
     )
 
     test_loader = NSWDataLoader(
@@ -332,6 +341,7 @@ def main(cfg: DictConfig):
 
     # init model and trainer
     ###################################################
+    print(cfg)
     model = Trainer(cfg)
 
     trainer = pl.Trainer(
@@ -348,26 +358,26 @@ def main(cfg: DictConfig):
         limit_train_batches=cfg.train_iteration_per_epoch,
     )
 
-    # train, valid, and test
-    ###################################################
-    if not cfg.test_only:
-        trainer.fit(
-            model,
-            train_loader,
-            valid_loader,
-            ckpt_path=cfg.ckpt_path,
-        ),
-        trainer.test(
-            model,
-            [test_loader],
-            ckpt_path="best",
-        )
-    else:
-        trainer.test(
-            model,
-            [test_loader],
-            ckpt_path=cfg.ckpt_path,
-        )
+    # # train, valid, and test
+    # ###################################################
+    # if not cfg.test_only:
+    #     trainer.fit(
+    #         model,
+    #         train_loader,
+    #         valid_loader,
+    #         ckpt_path=cfg.ckpt_path,
+    #     ),
+    #     trainer.test(
+    #         model,
+    #         [test_loader],
+    #         ckpt_path="best",
+    #     )
+    # else:
+    #     trainer.test(
+    #         model,
+    #         [test_loader],
+    #         ckpt_path=cfg.ckpt_path,
+    #     )
 
 if __name__ == "__main__":
 

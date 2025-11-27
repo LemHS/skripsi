@@ -1,0 +1,8 @@
+.env
+ckpts/
+logs/
+__pycache__/
+*.ipynb
+outputs/
+readme.md
+data/datasets/BraTS/BraTS2021_TrainingSet/**

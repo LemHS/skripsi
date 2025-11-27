@@ -3,9 +3,9 @@ from toolz.curried import *
 from torch.optim import SGD, Adam, AdamW
 
 
-def set_optimizer(model, opt_kwargs):
+def set_optimizer(theta, opt_kwargs):
 
-    theta = model.parameters()
+    # theta = model.parameters()
     
     opt_name = opt_kwargs["name"]
     opt_kwargs.pop("name")
