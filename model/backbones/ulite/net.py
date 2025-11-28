@@ -33,7 +33,7 @@ class ULite(Seg3D):
         self,
         input_shape: Sequence[int],
         output_shape: Sequence[int],
-        channels: Sequence[int] = [32, 64, 128, 256],
+        channels: Sequence[int] = [16, 32, 64, 128, 256],
         down_strides: Sequence[int] = [1, 1, 1, 1, 1],
         up_strides: Sequence[int] = [2, 2, 2, 2, 2],
         kernel_size: Sequence[int] | int = 1,
