@@ -358,26 +358,26 @@ def main(cfg: DictConfig):
         limit_train_batches=cfg.train_iteration_per_epoch,
     )
 
-    # # train, valid, and test
-    # ###################################################
-    # if not cfg.test_only:
-    #     trainer.fit(
-    #         model,
-    #         train_loader,
-    #         valid_loader,
-    #         ckpt_path=cfg.ckpt_path,
-    #     ),
-    #     trainer.test(
-    #         model,
-    #         [test_loader],
-    #         ckpt_path="best",
-    #     )
-    # else:
-    #     trainer.test(
-    #         model,
-    #         [test_loader],
-    #         ckpt_path=cfg.ckpt_path,
-    #     )
+    # train, valid, and test
+    ###################################################
+    if not cfg.test_only:
+        trainer.fit(
+            model,
+            train_loader,
+            valid_loader,
+            ckpt_path=cfg.ckpt_path,
+        ),
+        trainer.test(
+            model,
+            [test_loader],
+            ckpt_path="best",
+        )
+    else:
+        trainer.test(
+            model,
+            [test_loader],
+            ckpt_path=cfg.ckpt_path,
+        )
 
 if __name__ == "__main__":
 
