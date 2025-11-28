@@ -146,7 +146,7 @@ class Trainer(pl.LightningModule):
         gc.collect()
 
     def configure_optimizers(self):
-        model_optimizer = set_optimizer(self.net, opt_kwargs=self.cfg.optimizer)
+        model_optimizer = set_optimizer(self.net.parameters(), opt_kwargs=self.cfg.optimizer)
         model_scheduler = set_scheduler(model_optimizer, sch_kwargs=self.cfg.scheculer)
         return [model_optimizer], [model_scheduler]
 
