@@ -5,4 +5,5 @@ __pycache__/
 *.ipynb
 outputs/
 readme.md
+persistent_cache/
 data/datasets/BraTS/BraTS2021_TrainingSet/**
