@@ -18,7 +18,7 @@ seed_number: -1  # if -1 do not set seed
 epoch: 300
 train_iteration_per_epoch: 500 #400
 val_iteration_per_epoch: 100 # 100
-check_val_every_n_epoch: 2 # s
+check_val_every_n_epoch: 1 # s
 gpu_id: -1  # peaks the most free gpu when set to -1
 
 # path args
