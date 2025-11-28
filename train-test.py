@@ -316,6 +316,7 @@ def main(cfg: DictConfig):
         filename=ckpt_name,
         monitor=(f"{VALID}/{TOTAL_LOSS}"),
         save_top_k=1,
+        save_last=True,
         verbose=True,
         mode="min",
     )
