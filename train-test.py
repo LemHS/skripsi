@@ -341,8 +341,13 @@ def main(cfg: DictConfig):
 
     # init model and trainer
     ###################################################
+    print("==== CONFIG ====")
     print(cfg)
+    print("==== END CONFIG ====")
     model = Trainer(cfg)
+    print("==== MODEL ====")
+    print(model)
+    print("==== END MODEL ====")
 
     trainer = pl.Trainer(
         accelerator="gpu",
