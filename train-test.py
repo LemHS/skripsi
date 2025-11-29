@@ -13,6 +13,7 @@ import lightning as pl
 from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
 from lightning.pytorch.loggers import TensorBoardLogger
 from lightning.pytorch.profilers import PyTorchProfiler
+from lightning.pytorch.utilities import grad_norm
 
 from utils.opt import set_optimizer
 from utils.sch import set_scheduler
@@ -149,6 +150,10 @@ class Trainer(pl.LightningModule):
         model_optimizer = set_optimizer(self.net.parameters(), opt_kwargs=self.cfg.optimizer)
         model_scheduler = set_scheduler(model_optimizer, sch_kwargs=self.cfg.scheculer)
         return [model_optimizer], [model_scheduler]
+
+    def on_before_optimizer_step(self, optimizer):
+        for name, params in self.named_parameters():
+            self.my_log(f"grad_norm/{name}", grad_norm(params)["grad_2.0_norm_total"])
 
     def formulate_metric(self, net):
 
