@@ -152,8 +152,9 @@ class Trainer(pl.LightningModule):
         return [model_optimizer], [model_scheduler]
 
     def on_before_optimizer_step(self, optimizer):
-        for name, params in self.named_parameters():
-            self.my_log(f"grad_norm/{name}", grad_norm(params, norm_type=2)["grad_2.0_norm_total"])
+        for name, module in self.named_modules():
+            if len(list(module.parameters())) > 0:
+                self.my_log(f"grad_norm/{name}", grad_norm(module, norm_type=2)["grad_2.0_norm_total"])
 
     def formulate_metric(self, net):
 
