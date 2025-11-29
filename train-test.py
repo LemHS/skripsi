@@ -152,8 +152,13 @@ class Trainer(pl.LightningModule):
         return [model_optimizer], [model_scheduler]
 
     def on_before_optimizer_step(self, optimizer):
+        track_grad_modules = [
+            "net", 
+            "net.global_backbone", "net.global_backbone.encoder", "net.global_backbone.decoder", "net.global_backbone.bottleneck",
+            "net.local_backbone", "net.local_backbone.encoder", "net.local_backbone.decoder", "net.local_backbone.bottleneck",
+        ]
         for name, module in self.named_modules():
-            if len(list(module.parameters())) > 0:
+            if len(list(module.parameters())) > 0 and name in track_grad_modules:
                 self.my_log(f"grad_norm/{name}", grad_norm(module, norm_type=2)["grad_2.0_norm_total"])
 
     def formulate_metric(self, net):

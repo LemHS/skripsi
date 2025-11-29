@@ -1,7 +1,6 @@
 .env
 ckpts/
-logs/
-logs_1/
+logs*/
 __pycache__/
 *.ipynb
 outputs/
