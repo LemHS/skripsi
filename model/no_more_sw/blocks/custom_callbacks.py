@@ -76,7 +76,8 @@ class StopAtEpoch(Callback):
 
     def on_train_epoch_start(self, trainer, pl_module):
         current_epoch = trainer.current_epoch
-        if current_epoch >= self.stop_epoch:
+        stop_epoch = current_epoch + self.stop_epoch
+        if current_epoch >= stop_epoch:
             trainer.should_stop = True
 
 
