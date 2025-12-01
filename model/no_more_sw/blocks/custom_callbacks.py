@@ -23,20 +23,26 @@ class ReducingTau(Callback):
         self.total_epoch = None
         self.final_tau = final_tau
         self.starting_tau = starting_tau
-        self.state = {"final_tau": final_tau}
         self.k = reduction_mutiplier
+        self.state = {
+            "final_tau": final_tau,
+            "starting_tau": starting_tau,
+            "r": None,
+            "last_tau": starting_tau}
 
     def on_train_start(self, trainer, pl_module):
         self.total_epoch = trainer.max_epochs
 
         try:
-            self.starting_tau = pl_module.net.tau
+            pl_module.net.tau = self.state["last_tau"]
 
             self.r = (
                 -1
                 / (max(1, self.total_epoch * self.k))
                 * np.log(self.final_tau / self.starting_tau)
             )
+
+            self.state["r"] = self.r
         except AttributeError:
             pass
 
@@ -55,6 +61,7 @@ class ReducingTau(Callback):
                     updated_tau = current_tau * np.exp(-self.r)
 
                 pl_module.net.tau = updated_tau
+                self.state["last_tau"] = updated_tau
             except AttributeError:
                 pass
 
@@ -63,6 +70,12 @@ class ReducingTau(Callback):
 
     def state_dict(self):
         return self.state.copy()
+    
+    def on_save_checkpoint(self, trainer, pl_module, checkpoint):
+        checkpoint["reducing_tau_callback_state"] = self.state_dict()
+
+    def on_load_checkpoint(self, trainer, pl_module, checkpoint):
+        self.load_state_dict(checkpoint["reducing_tau_callback_state"])
     
 
 class StopAtEpoch(Callback):
