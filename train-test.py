@@ -388,11 +388,6 @@ def main(cfg: DictConfig):
             train_loader,
             valid_loader,
             ckpt_path=cfg.ckpt_path,
-        ),
-        trainer.test(
-            model,
-            [test_loader],
-            ckpt_path="best",
         )
     else:
         trainer.test(
