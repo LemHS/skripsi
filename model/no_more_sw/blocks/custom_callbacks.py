@@ -67,6 +67,17 @@ class ReducingTau(Callback):
 
     def state_dict(self):
         return self.state.copy()
+    
+
+class StopAtEpoch(Callback):
+    def __init__(self, stop_epoch):
+        super().__init__()
+        self.stop_epoch = stop_epoch
+
+    def on_train_epoch_start(self, trainer, pl_module):
+        current_epoch = trainer.current_epoch
+        if current_epoch >= self.stop_epoch:
+            trainer.should_stop = True
 
 
 if __name__ == "__main__":

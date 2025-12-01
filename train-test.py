@@ -26,7 +26,7 @@ from data.dataloader import NSWDataLoader
 from data.registry import data_registry
 
 from model.registry import model_registry
-from model.no_more_sw.blocks.custom_callbacks import ReducingTau
+from model.no_more_sw.blocks.custom_callbacks import ReducingTau, StopAtEpoch
 import gc
 
 
@@ -343,6 +343,10 @@ def main(cfg: DictConfig):
             reduction_mutiplier=cfg.model.reduction_mutiplier,
         )
         callbacks += [tau_reduction]
+
+    if cfg.stop_at_epoch is not None:
+        stop_at_epoch = StopAtEpoch(stop_epoch=cfg.stop_at_epoch)
+        callbacks += [stop_at_epoch]
 
     # profiler
     ###################################################
