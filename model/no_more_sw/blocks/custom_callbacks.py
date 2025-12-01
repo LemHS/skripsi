@@ -87,7 +87,7 @@ class StopAtEpoch(Callback):
         self.stop_epoch = trainer.current_epoch + self.stop_epoch
 
     def on_validation_epoch_end(self, trainer, pl_module):
-        current_epoch = trainer.current_epoch
+        current_epoch = trainer.current_epoch + 1
         if current_epoch >= self.stop_epoch:
             trainer.should_stop = True
 
