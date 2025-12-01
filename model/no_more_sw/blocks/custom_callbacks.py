@@ -27,18 +27,14 @@ class ReducingTau(Callback):
         self.k = reduction_mutiplier
 
     def on_train_start(self, trainer, pl_module):
-        self.starting_epoch = trainer.current_epoch
         self.total_epoch = trainer.max_epochs
 
         try:
-            if self.starting_tau is not None:
-                pl_module.net.tau = self.starting_tau
-            else:
-                self.starting_tau = pl_module.net.tau
+            self.starting_tau = pl_module.net.tau
 
             self.r = (
                 -1
-                / (max(1, self.total_epoch * self.k - self.starting_epoch))
+                / (max(1, self.total_epoch * self.k))
                 * np.log(self.final_tau / self.starting_tau)
             )
         except AttributeError:
