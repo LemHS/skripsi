@@ -74,11 +74,11 @@ class StopAtEpoch(Callback):
         super().__init__()
         self.stop_epoch = stop_epoch
 
-    def on_train_start(self, trainer, pl_module):
+    def on_fit_start(self, trainer, pl_module):
         self.stop_epoch = trainer.current_epoch + self.stop_epoch
 
-    def on_train_epoch_start(self, trainer, pl_module):
-        current_epoch = trainer.current_epoch
+    def on_validation_epoch_end(self, trainer, pl_module):
+        current_epoch = trainer.current_epoch + 1
         if current_epoch >= self.stop_epoch:
             trainer.should_stop = True
 
