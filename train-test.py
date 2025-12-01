@@ -338,7 +338,7 @@ def main(cfg: DictConfig):
     # ugly but lazy to change
     if cfg.model.name == "NSWNet3D":
         tau_reduction = ReducingTau(
-            starting_tau=cfg.model.starting_tau,
+            starting_tau=cfg.model.starting_tau if cfg.ckpt_path is None else None,
             final_tau=cfg.model.final_tau,
             reduction_mutiplier=cfg.model.reduction_mutiplier,
         )
