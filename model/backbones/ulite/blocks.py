@@ -470,7 +470,7 @@ class ADWConvUnit(nn.Module):
         for su in range(subunits):
             
             conv_only = last_conv_only and su == (subunits - 1)
-            if su == 0:
+            if su <= (subunits - 2):
                 unit = AxialDWConv(
                     self.spatial_dims,
                     schannels,
@@ -508,13 +508,13 @@ class ADWConvUnit(nn.Module):
             self.conv.add_module(f"unit{su:d}", unit)
 
             # after first loop set channels and strides to what they should be for subsequent units
-            if su != 0:
+            if su > (subunits - 2):
                 schannels = out_channels
             sstrides = 1
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         for unit, layer in enumerate(self.conv):
-            if unit == 0:
+            if unit <= len(self.conv) - 2:
                 skip_x: torch.Tensor = layer(x)
             else:
                 cx: torch.Tensor = layer(skip_x)  # apply x to sequence of operations
