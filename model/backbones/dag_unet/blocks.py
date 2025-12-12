@@ -684,6 +684,10 @@ class DAGCUNit(nn.Module):
             act=act,
         )
 
+        self.norm_act = nn.Sequential()
+        self.norm_act.add_module("norm", self.norm)
+        self.norm_act.add_module("act", self.act)
+
         self.down = nn.Sequential()
 
         if max_pool_kernel is not None:
@@ -691,6 +695,8 @@ class DAGCUNit(nn.Module):
             self.down.add_module("maxpool", max_pool)
         
         self.down.add_module("act", self.act)
+
+        self.FGlo = FGlo(out_channels)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         for unit, layer in enumerate(self.conv):
@@ -700,7 +706,8 @@ class DAGCUNit(nn.Module):
                 x_selected, x_unselected, upper = self._select_top_channels(skip_x, fraction=self.fraction)
                 cx: torch.Tensor = layer(x_selected)  # apply x to sequence of operations
                 cx = torch.cat((cx, x_unselected), dim=1)  # concatenate back unselected channels
-                cx = self.norm(cx)
+                cx = self.norm_act(cx)
+                cx = self.FGlo(cx)
                 cx = self.down(cx)
                 
         return cx, skip_x, upper
@@ -730,6 +737,24 @@ class DAGCUNit(nn.Module):
         unselected_channels = x[~selected_mask].view(b, c - num_select, d, h, w)
 
         return selected_channels, unselected_channels, upper
+    
+
+class FGlo(nn.Module):
+    def __init__(self, channels: int, reduction: int=16):
+        super().__init__()
+        self.avg_pool = nn.AdaptiveAvgPool3d(1)
+        self.fc = nn.Sequential(
+            nn.Linear(channels, channels // reduction, bias=False),
+            nn.ReLU(inplace=True),
+            nn.Linear(channels // reduction, channels, bias=False),
+            nn.Sigmoid(),
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        b, c, _, _, _ = x.size()
+        y = self.avg_pool(x).view(b, c)
+        y = self.fc(y).view(b, c, 1, 1, 1)
+        return x * y
         
 
 class IntermediateLayerGetter(nn.ModuleDict):
