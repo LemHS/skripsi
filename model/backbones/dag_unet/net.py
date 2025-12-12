@@ -115,7 +115,7 @@ class DAGUNet(Seg3D):
 
     def forward(self, vol: torch.tensor) -> torch.tensor:
         x, features = self.encoder(vol)
-        x = self.bottleneck(x)
+        x, skips, _ = self.bottleneck(x)
         features = self.decoder(features + [x])
         return features
     
@@ -270,7 +270,6 @@ class Decoder(nn.Module):
 
     def forward(self, features):
         x0, x1, x2, x3, x4 = features
-
         u3 = self.up_0(x4, x3)
         u2 = self.up_1(u3, x2)
         u1 = self.up_2(u2, x1)
