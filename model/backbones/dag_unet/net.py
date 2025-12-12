@@ -119,7 +119,7 @@ class DAGUNet(Seg3D):
         features = self.decoder(features + [x])
         return features
     
-    
+    @property
     def feature_shapes(self):
         with torch.no_grad():
             x = (
