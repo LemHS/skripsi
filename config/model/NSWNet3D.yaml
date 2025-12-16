@@ -9,7 +9,7 @@ num_infernce_patches: 4 # patches used during test/validation
 starting_tau :  2
 final_tau : 0.3333
 add_aggregation_module : true
-reduction_mutiplier : 1
+reduction_mutiplier : 0.25
 entropy_multiplier : 0.0001 #0.0005 # 0.001
 
 defaults: 
