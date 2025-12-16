@@ -26,7 +26,7 @@ from data.dataloader import NSWDataLoader
 from data.registry import data_registry
 
 from model.registry import model_registry
-from model.no_more_sw.blocks.custom_callbacks import ReducingTau, StopAtEpoch
+from model.no_more_sw.blocks.custom_callbacks import ReducingTau, StopAtEpoch, EarlyStoppingWithWarmup
 import gc
 
 
@@ -343,6 +343,16 @@ def main(cfg: DictConfig):
             reduction_mutiplier=cfg.model.reduction_mutiplier,
         )
         callbacks += [tau_reduction]
+
+    if cfg.early_stopping:
+        early_stopping = EarlyStoppingWithWarmup(
+            monitor=f"{VALID}/{TOTAL_LOSS}",
+            patience=10,
+            verbose=True,
+            mode="min",
+            warmup=cfg.model.reduction_mutiplier * cfg.epoch if cfg.model.name == "NSWNet3D" else 0,
+        )
+        callbacks += [early_stopping]
 
     if cfg.stop_at_epoch is not None:
         stop_at_epoch = StopAtEpoch(stop_epoch=cfg.stop_at_epoch)

@@ -1,4 +1,4 @@
-from lightning.pytorch.callbacks import Callback
+from lightning.pytorch.callbacks import Callback, EarlyStopping
 import torch
 import numpy as np
 
@@ -90,6 +90,19 @@ class StopAtEpoch(Callback):
         current_epoch = trainer.current_epoch + 1
         if current_epoch >= self.stop_epoch:
             trainer.should_stop = True
+
+class EarlyStoppingWithWarmup(EarlyStopping):
+    """
+    EarlyStopping, but disabled for the first `warmup` epochs.
+    """
+    def __init__(self, warmup=10, **kwargs):
+        super().__init__(**kwargs)
+        self.warmup = warmup
+
+    def on_validation_end(self, trainer, pl_module):
+        if trainer.current_epoch + 1 < self.warmup:
+            return
+        super().on_validation_end(trainer, pl_module)
 
 
 if __name__ == "__main__":
