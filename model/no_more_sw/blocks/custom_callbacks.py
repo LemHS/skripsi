@@ -99,12 +99,12 @@ class EarlyStoppingWithWarmup(EarlyStopping):
         super().__init__(**kwargs)
         self.warmup = warmup
 
-    def _run_early_stopping_check(self, trainer, pl_module):
+    def _run_early_stopping_check(self, trainer):
         print("debugging", trainer.current_epoch + 1, self.warmup)
         if trainer.current_epoch + 1 < self.warmup:
             print("debugging", trainer.current_epoch + 1, self.warmup)
             return
-        super()._run_early_stopping_check(trainer, pl_module)
+        super()._run_early_stopping_check(trainer)
 
 
 if __name__ == "__main__":
