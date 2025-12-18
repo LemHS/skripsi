@@ -100,7 +100,9 @@ class EarlyStoppingWithWarmup(EarlyStopping):
         self.warmup = warmup
 
     def on_validation_end(self, trainer, pl_module):
+        print("debugging", trainer.current_epoch + 1, self.warmup)
         if trainer.current_epoch + 1 < self.warmup:
+            print("debugging", trainer.current_epoch + 1, self.warmup)
             return
         super().on_validation_end(trainer, pl_module)
 
