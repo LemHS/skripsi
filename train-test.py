@@ -174,16 +174,6 @@ class Trainer(pl.LightningModule):
             label_keys=self.cfg.label_keys,
             do_crop_based=do_crop_based,
         )
-        
-        _haus_mean_metric = lambda: Haus(
-            num_classes=self.cfg.num_classes,
-            average="mean",
-        )
-        _haus_class_metric = lambda: Haus(
-            num_classes=self.cfg.num_classes,
-            average="none",
-            label_keys=self.cfg.label_keys,
-        )
 
         _nsd_mean_metric = lambda: NSD(
             num_classes=self.cfg.num_classes,
@@ -205,8 +195,6 @@ class Trainer(pl.LightningModule):
                         "dice_mean": _dice_mean_metric(False),
                         "dice_class": _dice_class_metric(False),
                     }
-                    | ({"haus_class": _haus_class_metric()} if mode == TEST else {})
-                    | ({"haus_mean": _haus_mean_metric()} if mode == TEST else {})
                     | ({"nsd_class": _nsd_class_metric()} if mode == TEST else {})
                     | ({"nsd_mean": _nsd_mean_metric()} if mode == TEST else {})
                     # expensive. so only during testing
