@@ -364,7 +364,7 @@ def main(cfg: DictConfig):
     print("==== END MODEL ====")
 
     trainer = pl.Trainer(
-        accelerator="gpu",
+        accelerator="gpu" if not cfg.test_only else "cpu",
         profiler=profiler if cfg.profile_debug else None,
         precision=cfg.precision,
         max_epochs=cfg.epoch,
