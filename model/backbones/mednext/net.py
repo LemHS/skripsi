@@ -479,16 +479,19 @@ class Decoder(nn.Module):
             # del x_res_3, x_up_3
 
             x_up_2 = checkpoint.checkpoint(self.up_2, x, self.dummy_tensor)
+            x_up_2 = self.pad_skip(x_up_2, x_res_2)
             dec_x = x_res_2 + x_up_2
             x = self.iterative_checkpoint(self.dec_block_2, dec_x)
             # del x_res_2, x_up_2
 
             x_up_1 = checkpoint.checkpoint(self.up_1, x, self.dummy_tensor)
+            x_up_1 = self.pad_skip(x_up_1, x_res_1)
             dec_x = x_res_1 + x_up_1
             x = self.iterative_checkpoint(self.dec_block_1, dec_x)
             # del x_res_1, x_up_1
 
             x_up_0 = checkpoint.checkpoint(self.up_0, x, self.dummy_tensor)
+            x_up_0 = self.pad_skip(x_up_0, x_res_0)
             dec_x = x_res_0 + x_up_0
             x = self.iterative_checkpoint(self.dec_block_0, dec_x)
             # del x_res_0, x_up_0, dec_x
@@ -502,16 +505,19 @@ class Decoder(nn.Module):
             # del x_res_3, x_up_3
 
             x_up_2 = self.up_2(x)
+            x_up_2 = self.pad_skip(x_up_2, x_res_2)
             dec_x = x_res_2 + x_up_2
             x = self.dec_block_2(dec_x)
             # del x_res_2, x_up_2
 
             x_up_1 = self.up_1(x)
+            x_up_1 = self.pad_skip(x_up_1, x_res_1)
             dec_x = x_res_1 + x_up_1
             x = self.dec_block_1(dec_x)
             # del x_res_1, x_up_1
 
             x_up_0 = self.up_0(x)
+            x_up_0 = self.pad_skip(x_up_0, x_res_0)
             dec_x = x_res_0 + x_up_0
             x = self.dec_block_0(dec_x)
             # del x_res_0, x_up_0, dec_x
@@ -519,6 +525,26 @@ class Decoder(nn.Module):
             x = self.out_0(x)
 
         return [*features, x_up_2, x_up_1, x_up_0, x]
+    
+    def pad_skip(self, x, x_e):
+        
+        x_d = x.shape[-3]
+        x_h = x.shape[-2]
+        x_w = x.shape[-1]
+        x_e_d = x_e.shape[-3]
+        x_e_h = x_e.shape[-2]
+        x_e_w = x_e.shape[-1]
+
+        d_diff = x_e_d - x_d
+        h_diff = x_e_h - x_h
+        w_diff = x_e_w - x_w
+
+        pad_d = [d_diff // 2, d_diff - d_diff // 2]
+        pad_h = [h_diff // 2, h_diff - h_diff // 2]
+        pad_w = [w_diff // 2, w_diff - w_diff // 2]
+        
+        x = F.pad(x, pad_w + pad_h + pad_d)
+        return x
 
 
 @backbone_registry.register
