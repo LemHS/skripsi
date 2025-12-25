@@ -32,5 +32,6 @@ ckpt_path : null
 # additional
 do_vis: true
 profile_debug: false
+test_metric: "dsc"
 
 kaggle: false

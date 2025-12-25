@@ -190,15 +190,24 @@ class Trainer(pl.LightningModule):
             metrics[mode] = {}
             keys = getattr(net, f"{mode.lower()}_keys")
             for key in keys:
-                metrics[mode][key] = (
-                    {
-                        "dice_mean": _dice_mean_metric(False),
-                        "dice_class": _dice_class_metric(False),
-                    }
-                    | ({"nsd_class": _nsd_class_metric()} if mode == TEST else {})
-                    | ({"nsd_mean": _nsd_mean_metric()} if mode == TEST else {})
-                    # expensive. so only during testing
-                )
+                if mode != TEST:
+                    metrics[mode][key] = (
+                        {
+                            "dice_mean": _dice_mean_metric(False),
+                            "dice_class": _dice_class_metric(False),
+                        }
+                    )
+                else:
+                    if self.cfg.test_metric == "dsc":
+                        metrics[mode][key] = {
+                            "dice_mean": _dice_mean_metric(False),
+                            "dice_class": _dice_class_metric(False),
+                        }
+                    elif self.cfg.test_metric == "nsd":
+                        metrics[mode][key] = {
+                            "nsd_mean": _nsd_mean_metric(),
+                            "nsd_class": _nsd_class_metric(),
+                        }
         return metrics
 
     def log_image_at_current_step(self, txt, x):
