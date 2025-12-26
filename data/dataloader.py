@@ -40,7 +40,7 @@ class NSWDataLoader(DataLoader):
 
         if iteration_per_epoch is not None:
             sampler = torch.utils.data.RandomSampler(
-                dataset, replacement=True, num_samples=iteration_per_epoch
+                dataset, replacement=False, num_samples=iteration_per_epoch
             )
         else:
             sampler = None
