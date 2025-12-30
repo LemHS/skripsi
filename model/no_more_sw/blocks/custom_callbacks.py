@@ -99,8 +99,17 @@ class EarlyStoppingWithWarmup(EarlyStopping):
         super().__init__(**kwargs)
         self.warmup = warmup
 
+    def _update_best_score(self, current: float) -> float:
+        if self.monitor_op(current - self.min_delta, self.best_score.to(current.device)):
+            return current
+        else:
+            return self.best_score
+
     def _run_early_stopping_check(self, trainer):
         if trainer.current_epoch + 1 < self.warmup:
+            logs = trainer.callback_metrics
+            current = logs[self.monitor].squeeze()
+            self.best_score = self._update_best_score(current)
             return
         super()._run_early_stopping_check(trainer)
 
