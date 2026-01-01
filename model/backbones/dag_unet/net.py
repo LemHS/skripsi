@@ -33,7 +33,7 @@ class DAGUNet(Seg3D):
         self,
         input_shape: Sequence[int],
         output_shape: Sequence[int],
-        channels: Sequence[int] = [16, 32, 64, 128, 256],
+        channels: Sequence[int] = [32, 64, 128, 256],
         down_strides: Sequence[int] = [1, 1, 1, 1, 1],
         up_strides: Sequence[int] = [2, 2, 2, 2, 2],
         kernel_size: Sequence[int] | int = 1,
@@ -269,13 +269,13 @@ class Decoder(nn.Module):
         )
 
     def forward(self, features):
-        x0, x1, x2, x3, x4 = features
-        u3 = self.up_0(x4, x3)
-        u2 = self.up_1(u3, x2)
-        u1 = self.up_2(u2, x1)
-        u0 = self.up_3(u1, x0)
+        x0, x1, x2, x3 = features
+
+        u2 = self.up_0(x3, x2)
+        u1 = self.up_1(u2, x1)
+        u0 = self.up_2(u1, x0)
         logit = self.top_conv(u0)
-        return [*features, u3, u2, u1, u0, logit]
+        return [*features, u2, u1, u0, logit]
 
 class Down(nn.Sequential):
     """strided-conv + conv"""
