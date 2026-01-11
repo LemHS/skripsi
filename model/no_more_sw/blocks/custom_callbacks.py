@@ -106,7 +106,7 @@ class EarlyStoppingWithWarmup(EarlyStopping):
             return self.best_score
 
     def _run_early_stopping_check(self, trainer):
-        if trainer.current_epoch + 1 < self.warmup:
+        if trainer.current_epoch < self.warmup:
             logs = trainer.callback_metrics
             current = logs[self.monitor].squeeze()
             self.best_score = self._update_best_score(current)
