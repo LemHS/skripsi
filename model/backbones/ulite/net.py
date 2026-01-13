@@ -40,7 +40,7 @@ class ULite(Seg3D):
         up_kernel_size: Sequence[int] | int = 1,
         max_pool_kernel: Sequence[int] | int = 2,
         num_units: int = 2,
-        act: str | tuple = "PRELU",
+        act: str | tuple = "GELU",
         norm: str | tuple = "INSTANCE",
         dropout: float = 0.0,
         bias: bool = True,
@@ -97,6 +97,9 @@ class ULite(Seg3D):
             spatial_dims=spatial_dims,
             in_channels=channels[-1],
             strides=1,
+            act=act,
+            norm=norm,
+            encoder_dropout=dropout,
         )
 
         self.decoder = Decoder(
