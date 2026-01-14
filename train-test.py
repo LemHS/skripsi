@@ -373,7 +373,7 @@ def main(cfg: DictConfig):
     print("==== END MODEL ====")
 
     trainer = pl.Trainer(
-        accelerator="gpu",
+        accelerator=cfg.accelerator,
         profiler=profiler if cfg.profile_debug else None,
         precision=cfg.precision,
         max_epochs=cfg.epoch,
