@@ -74,7 +74,7 @@ class LocalSeg3D(nn.Module):
         self.patch_size = patch_size
         self.pos = pos
         self.neg = neg
-        self.num_patches = num_patches
+        self.num_patches = int(num_patches)
         self.ckpt_path = ckpt_path
         self.sigma_scale = sigma_scale
 
