@@ -57,7 +57,7 @@ class MedNeXtBlock(nn.Module):
         )
 
         # GeLU activations
-        self.act = nn.GELU()
+        self.act = nn.PReLU()
 
         # Third convolution (Compression) layer with Conv3D 1x1x1
         self.conv3 = conv(
