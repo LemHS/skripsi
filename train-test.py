@@ -85,7 +85,13 @@ class Trainer(pl.LightningModule):
                         metric_fn.update(
                             otuput_d[pred_type + LOGIT], otuput_d[pred_type + LAB]
                         )
-        return otuput_d
+        
+        if mode == TEST:
+            del otuput_d
+            torch.cuda.empty_cache()
+            gc.collect()
+        else:
+            return otuput_d
 
     def common_epoch_end(self, mode):
 
