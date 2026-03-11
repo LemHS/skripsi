@@ -40,7 +40,7 @@ class ULite(Seg3D):
         up_kernel_size: Sequence[int] | int = 1,
         max_pool_kernel: Sequence[int] | int = 2,
         num_units: int = 2,
-        act: str | tuple = "GELU",
+        act: str | tuple = "PRELU",
         norm: str | tuple = "INSTANCE",
         dropout: float = 0.0,
         bias: bool = True,

@@ -210,12 +210,13 @@ class NSD(Metric):
     ) -> None:
         if pred.shape[2:] != target.shape[2:]:
             raise ValueError("pred and target must have the same shape")
-
+        
+        pred = pred.cpu()
+        target = target.cpu()
+        
         score = compute_surface_dice(
             F.one_hot(pred.argmax(dim=1), self.num_classes).permute(0, -1, 1, 2, 3),
-            F.one_hot(target.squeeze(1).long(), self.num_classes).permute(
-                0, -1, 1, 2, 3
-            ),
+            F.one_hot(target.squeeze(1).long(), self.num_classes).permute(0, -1, 1, 2, 3),
             class_thresholds=(
                 self.class_thresholds
                 if self.include_background
@@ -223,8 +224,11 @@ class NSD(Metric):
             ),
             include_background=self.include_background,
         )
-
-        self.scores.append(score)
+        
+        self.scores.append(score.detach().cpu())
+        
+        del pred, target, score
+        torch.cuda.empty_cache()
 
     def compute(self) -> float:
         scores: TensorType["n_sample", "n_class", float] = torch.cat(self.scores)
