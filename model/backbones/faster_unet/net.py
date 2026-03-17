@@ -364,7 +364,7 @@ class BottleNeck(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.conv(x)
+        x, _ = self.conv(x)
         x = self.act(x)
         return x
 
