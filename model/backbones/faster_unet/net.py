@@ -347,7 +347,7 @@ class BottleNeck(nn.Module):
                 strides=1,
                 kernel_size=kernel_size,
                 max_pool_kernel=None,
-                subunits=1,
+                subunits=2,
                 act=act,
                 norm=norm,
                 dropout=encoder_dropout,
