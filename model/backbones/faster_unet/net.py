@@ -341,16 +341,19 @@ class BottleNeck(nn.Module):
         super().__init__()
 
         self.conv = ResidualUnit(
-            spatial_dims=spatial_dims,
-            in_channels=in_channels,
-            out_channels=in_channels,
-            kernel_size=kernel_size,
-            max_pool_kernel=max_pool_kernel,
-            strides=strides,
-            dropout=encoder_dropout,
-            bias=bias,
-            conv_only=True
-        )
+                spatial_dims,
+                in_channels,
+                in_channels,
+                strides=1,
+                kernel_size=kernel_size,
+                max_pool_kernel=None,
+                subunits=1,
+                act=act,
+                norm=norm,
+                dropout=encoder_dropout,
+                bias=bias,
+                adn_ordering=adn_ordering,
+            )
 
         self.act = ADN(
             ordering="A",
