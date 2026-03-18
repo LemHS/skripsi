@@ -56,12 +56,7 @@ class Trainer(pl.LightningModule):
 
     def training_step(self, input_d, _):
         output_d = self.common_step(TRAIN, input_d)
-        loss = output_d[TOTAL_LOSS]
-        # FIX: Explicitly delete the output dict after extracting the loss scalar.
-        # Without this, the full output dict (including activations) stays alive
-        # until Python's GC runs, often surviving into the next step.
-        del output_d
-        return loss
+        return output_d[TOTAL_LOSS]
 
     def validation_step(self, input_d, batch_idx):
         output_d = self.common_step(VALID, input_d)
@@ -73,15 +68,11 @@ class Trainer(pl.LightningModule):
     def common_step(self, mode, input_d):
 
         otuput_d = getattr(self.net, f"{mode.lower()}_step")(input_d)
- 
+
         loss_d = keyfilter(lambda k: LOSS in k, otuput_d)
         for loss_name, loss_value in loss_d.items():
-            # FIX 1: .item() extracts a plain Python float, severing the
-            # gradient graph entirely. Without this, self.log(on_epoch=True)
-            # accumulates a list of graph-attached tensors across every step
-            # of the epoch — the primary cause of linear memory growth.
-            self.my_log(f"{mode}/{loss_name}", loss_value.item())
- 
+            self.my_log(f"{mode}/{loss_name}", loss_value)
+
         if mode != TRAIN:
             for pred_type, metric_dict in self.metrics[mode].items():
                 for _, metric_fn in metric_dict.items():
@@ -89,26 +80,16 @@ class Trainer(pl.LightningModule):
                         processed_logit = self.post_process_logit(
                             otuput_d[pred_type + LOGIT]
                         )
-                        # FIX 2: detach before metric.update(). Metric objects
-                        # store internal buffers of whatever tensors are passed
-                        # in. Passing a grad-attached logit means the full
-                        # computation graph for that step is kept alive in the
-                        # metric's state until reset() is called at epoch end.
-                        metric_fn.update(
-                            processed_logit.detach(),
-                            otuput_d[pred_type + LAB].detach(),
-                        )
+                        metric_fn.update(processed_logit, otuput_d[pred_type + LAB])
                     else:
                         metric_fn.update(
-                            otuput_d[pred_type + LOGIT].detach(),
-                            otuput_d[pred_type + LAB].detach(),
+                            otuput_d[pred_type + LOGIT], otuput_d[pred_type + LAB]
                         )
- 
+        
         if mode == TEST:
             del otuput_d
             torch.cuda.empty_cache()
             gc.collect()
-            return None
         else:
             return otuput_d
 
@@ -183,15 +164,8 @@ class Trainer(pl.LightningModule):
             "net.local_backbone", "net.local_backbone.encoder", "net.local_backbone.decoder", "net.local_backbone.bottleneck",
         ]
         for name, module in self.named_modules():
-            if name not in track_grad_modules:
-                continue
-            if len(list(module.parameters())) == 0:
-                continue
-            # FIX 3: .item() on grad_norm result — same graph retention issue
-            self.my_log(
-                f"grad_norm/{name}",
-                grad_norm(module, norm_type=2)["grad_2.0_norm_total"].item()
-            )
+            if len(list(module.parameters())) > 0 and name in track_grad_modules:
+                self.my_log(f"grad_norm/{name}", grad_norm(module, norm_type=2)["grad_2.0_norm_total"])
 
     def formulate_metric(self, net):
 
