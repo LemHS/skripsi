@@ -56,7 +56,12 @@ class Trainer(pl.LightningModule):
 
     def training_step(self, input_d, _):
         output_d = self.common_step(TRAIN, input_d)
-        return output_d[TOTAL_LOSS]
+        loss = output_d[TOTAL_LOSS]
+        # FIX: Explicitly delete the output dict after extracting the loss scalar.
+        # Without this, the full output dict (including activations) stays alive
+        # until Python's GC runs, often surviving into the next step.
+        del output_d
+        return loss
 
     def validation_step(self, input_d, batch_idx):
         output_d = self.common_step(VALID, input_d)
