@@ -233,7 +233,8 @@ def main(cfg: DictConfig):
     # load args and set states
     ###################################################
     set_seed(cfg.seed_number)
-    set_gpu(cfg.gpu_id)
+    if cfg.accelerator != "tpu":
+        set_gpu(cfg.gpu_id)
 
     # Load Train & Test datasets
     ###################################################
