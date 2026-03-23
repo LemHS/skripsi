@@ -386,6 +386,7 @@ def main(cfg: DictConfig):
         max_epochs=cfg.epoch,
         logger=logger,
         callbacks=callbacks,
+        strategy=cfg.strategy,
         check_val_every_n_epoch=cfg.check_val_every_n_epoch,
         num_sanity_val_steps=0,
         gradient_clip_val=1,
