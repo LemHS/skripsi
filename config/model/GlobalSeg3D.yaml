@@ -2,6 +2,8 @@
 name: GlobalSeg3D
 global_backbone_name : "FasterUNet" # FasterUNet | DeepLab | DeepLabPlus | MedNeXtSmall | MedNeXtMedium | MedNeXtLarge | UNETRSwin | UNETRVit
 ckpt_path : null
+act: "PRELU"
+
 
 defaults: 
   - global_loss: dce_monai # dce_monai | dce_nnunet | rce # dce_nnunet is memory efficient

@@ -57,6 +57,7 @@ class LocalSeg3D(nn.Module):
         neg: int = 1,
         num_patches: int = 5,
         sigma_scale: float = 0.125,
+        act: str = "PRELU",
         ckpt_path: None | str = None,
         local_loss: dict[str, Any] = {
             "name": "DiceCELossMONAI",

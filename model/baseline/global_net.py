@@ -56,6 +56,7 @@ class GlobalSeg3D(nn.Module):
         global_loss: dict[str, Any] = {
             "name": "DiceCELossMONAI",
         },
+        act: str = "PRELU",
         *args,
         **kwargs,
     ) -> None:

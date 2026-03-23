@@ -9,3 +9,4 @@ patch_weight : 0.99 # almost rely on local when available
 sampling_stretegy: "random" # s_w | random_fg | random
 local_ckpt_path: null
 global_ckpt_path: null
+act: "PRELU"

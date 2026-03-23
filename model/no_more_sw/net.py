@@ -63,6 +63,7 @@ class NSWNet3D(nn.Module):
         num_infernce_patches: int = 5,  # patches used during test/validation
         add_aggregation_module: bool = True,
         tau: float = 2 / 3,
+        act: str = "PRELU",
         loss_num_patches: int = 5,
         loss_patch_size: list[int] = [128, 128, 128],
         local_ckpt_path: str = "",
@@ -126,12 +127,14 @@ class NSWNet3D(nn.Module):
             input_shape=self.local_input_shape,
             output_shape=self.local_output_shape,
             loss_args=local_loss,
+            act=act,
         )
 
         self.global_backbone = backbone_registry[self.global_backbone_name](
             input_shape=self.global_input_shape,
             output_shape=self.global_output_shape,
             loss_args=global_loss,
+            act=act,
         )
 
         # self.local_backbone.compile(mode="max-autotune")

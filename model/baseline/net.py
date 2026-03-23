@@ -61,6 +61,7 @@ class GlobalLocalSeg3D(nn.Module):
         local_ckpt_path: str | None = None,
         global_ckpt_path: str | None = None,
         sampling_stretegy: str = ["random", "random_fg", "s_w"],
+        act: str = "PRELU",
         *args,
         **kwargs,
     ) -> None:
