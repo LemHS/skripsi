@@ -356,21 +356,9 @@ class AxialDWConv(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         with record_function("AxialDWConv"):
-            s1 = torch.cuda.Stream()
-            s2 = torch.cuda.Stream()
-            s3 = torch.cuda.Stream()
-
-            with torch.cuda.stream(s1):
-                conv_d = self.conv_d(x)
-
-            with torch.cuda.stream(s2):
-                conv_h = self.conv_h(x)
-
-            with torch.cuda.stream(s3):
-                conv_w = self.conv_w(x)
-
-            torch.cuda.synchronize()
-
+            conv_d = self.conv_d(x)
+            conv_h = self.conv_h(x)
+            conv_w = self.conv_w(x)
             conv = x + conv_h + conv_w + conv_d
             if hasattr(self, "adn"):
                 return self.adn(conv)
