@@ -8,6 +8,7 @@ from toolz.curried import *
 from toolz.curried.operator import *
 
 import torch
+from torch import autocast
 
 import lightning as pl
 from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
@@ -66,8 +67,13 @@ class Trainer(pl.LightningModule):
         self.common_step(TEST, input_d)
 
     def common_step(self, mode, input_d):
+        with autocast(device_type=self.device.type):
+            otuput_d = getattr(self.net, f"{mode.lower()}_step")(input_d)
 
-        otuput_d = getattr(self.net, f"{mode.lower()}_step")(input_d)
+        otuput_d = {
+            k: v.float() if isinstance(v, torch.Tensor) else v
+            for k, v in otuput_d.items()
+        }
 
         loss_d = keyfilter(lambda k: LOSS in k, otuput_d)
         for loss_name, loss_value in loss_d.items():
@@ -83,9 +89,10 @@ class Trainer(pl.LightningModule):
                         metric_fn.update(processed_logit, otuput_d[pred_type + LAB])
                     else:
                         metric_fn.update(
-                            otuput_d[pred_type + LOGIT], otuput_d[pred_type + LAB]
+                            otuput_d[pred_type + LOGIT],
+                            otuput_d[pred_type + LAB],
                         )
-        
+
         if mode == TEST:
             del otuput_d
             torch.cuda.empty_cache()
