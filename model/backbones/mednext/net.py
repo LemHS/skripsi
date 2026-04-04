@@ -155,6 +155,7 @@ class Encoder(nn.Module):
             kernel_size=enc_kernel_size,
             do_res=do_res_up_down,
             norm_type=norm_type,
+            act=act,
             dim=dim,
         )
 
@@ -182,6 +183,7 @@ class Encoder(nn.Module):
             kernel_size=enc_kernel_size,
             do_res=do_res_up_down,
             norm_type=norm_type,
+            act=act,
             dim=dim,
             grn=grn,
         )
@@ -210,6 +212,7 @@ class Encoder(nn.Module):
             kernel_size=enc_kernel_size,
             do_res=do_res_up_down,
             norm_type=norm_type,
+            act=act,
             dim=dim,
             grn=grn,
         )
@@ -386,6 +389,7 @@ class Decoder(nn.Module):
             kernel_size=kernel_size,
             do_res=do_res_up_down,
             norm_type=norm_type,
+            act=act,
             dim=dim,
             grn=grn,
         )
@@ -414,6 +418,7 @@ class Decoder(nn.Module):
             kernel_size=kernel_size,
             do_res=do_res_up_down,
             norm_type=norm_type,
+            act=act,
             dim=dim,
             grn=grn,
         )
@@ -442,6 +447,7 @@ class Decoder(nn.Module):
             kernel_size=kernel_size,
             do_res=do_res_up_down,
             norm_type=norm_type,
+            act=act,
             dim=dim,
             grn=grn,
         )

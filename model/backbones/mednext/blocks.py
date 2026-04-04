@@ -116,6 +116,7 @@ class MedNeXtDownBlock(MedNeXtBlock):
         kernel_size=7,
         do_res=False,
         norm_type="group",
+        act="PRELU",
         dim="3d",
         grn=False,
     ):
@@ -174,6 +175,7 @@ class MedNeXtUpBlock(MedNeXtBlock):
         kernel_size=7,
         do_res=False,
         norm_type="group",
+        act="PRELU",
         dim="3d",
         grn=False,
     ):
