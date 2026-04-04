@@ -345,7 +345,7 @@ class Decoder(nn.Module):
             2,  # decoder 3
         ],
         norm_type="group",
-        act="act",
+        act="PRELU",
         dim="3d",
         grn=False,
         outside_block_checkpointing=False,

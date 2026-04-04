@@ -128,6 +128,7 @@ class MedNeXtDownBlock(MedNeXtBlock):
             kernel_size,
             do_res=False,
             norm_type=norm_type,
+            act=act,
             dim=dim,
             grn=grn,
         )
@@ -186,6 +187,7 @@ class MedNeXtUpBlock(MedNeXtBlock):
             kernel_size,
             do_res=False,
             norm_type=norm_type,
+            act=act,
             dim=dim,
             grn=grn,
         )
