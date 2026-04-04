@@ -42,6 +42,7 @@ class MedNeXt(Seg3D):
         ],  # Can be used to test staging ratio:
         # [3,3,9,3] in Swin as opposed to [2,2,2,2,2] in nnUNet
         norm_type="group",
+        act="PRELU",
         dim="3d",  # 2d or 3d
         grn=False,
         loss_args={
@@ -67,6 +68,7 @@ class MedNeXt(Seg3D):
             do_res_up_down=do_res_up_down,
             block_counts=block_counts[: len(block_counts) // 2 + 1],
             norm_type=norm_type,
+            act=act,
             dim=dim,
             grn=False,
             outside_block_checkpointing=self.outside_block_checkpointing,
@@ -81,6 +83,7 @@ class MedNeXt(Seg3D):
             do_res_up_down=do_res_up_down,
             block_counts=block_counts[len(block_counts) // 2 + 1 :],
             norm_type=norm_type,
+            act=act,
             dim=dim,
             grn=False,
             outside_block_checkpointing=self.outside_block_checkpointing,
@@ -111,6 +114,7 @@ class Encoder(nn.Module):
             2,  # bottleneck
         ],
         norm_type="group",
+        act="PRELU",
         dim="3d",
         grn=False,
         outside_block_checkpointing=False,
@@ -136,6 +140,7 @@ class Encoder(nn.Module):
                     kernel_size=enc_kernel_size,
                     do_res=do_res,
                     norm_type=norm_type,
+                    act=act,
                     dim=dim,
                     grn=grn,
                 )
@@ -162,6 +167,7 @@ class Encoder(nn.Module):
                     kernel_size=enc_kernel_size,
                     do_res=do_res,
                     norm_type=norm_type,
+                    act=act,
                     dim=dim,
                     grn=grn,
                 )
@@ -189,6 +195,7 @@ class Encoder(nn.Module):
                     kernel_size=enc_kernel_size,
                     do_res=do_res,
                     norm_type=norm_type,
+                    act=act,
                     dim=dim,
                     grn=grn,
                 )
@@ -243,6 +250,7 @@ class Encoder(nn.Module):
                     kernel_size=enc_kernel_size,
                     do_res=do_res,
                     norm_type=norm_type,
+                    act=act,
                     dim=dim,
                     grn=grn,
                 )
@@ -334,6 +342,7 @@ class Decoder(nn.Module):
             2,  # decoder 3
         ],
         norm_type="group",
+        act="act",
         dim="3d",
         grn=False,
         outside_block_checkpointing=False,
@@ -390,6 +399,7 @@ class Decoder(nn.Module):
                     kernel_size=kernel_size,
                     do_res=do_res,
                     norm_type=norm_type,
+                    act=act,
                     dim=dim,
                     grn=grn,
                 )
@@ -417,6 +427,7 @@ class Decoder(nn.Module):
                     kernel_size=kernel_size,
                     do_res=do_res,
                     norm_type=norm_type,
+                    act=act,
                     dim=dim,
                     grn=grn,
                 )
@@ -444,6 +455,7 @@ class Decoder(nn.Module):
                     kernel_size=kernel_size,
                     do_res=do_res,
                     norm_type=norm_type,
+                    act=act,
                     dim=dim,
                     grn=grn,
                 )

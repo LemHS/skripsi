@@ -13,6 +13,7 @@ class MedNeXtBlock(nn.Module):
         kernel_size: int = 7,
         do_res: int = True,
         norm_type: str = "group",
+        act: str = "PRELU",
         n_groups: int | None = None,
         dim="3d",
         grn=False,
@@ -57,7 +58,7 @@ class MedNeXtBlock(nn.Module):
         )
 
         # GeLU activations
-        self.act = nn.PReLU()
+        self.act = nn.PReLU() if act == "PRELU" else nn.GELU()
 
         # Third convolution (Compression) layer with Conv3D 1x1x1
         self.conv3 = conv(
