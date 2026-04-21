@@ -64,7 +64,20 @@ class Trainer(pl.LightningModule):
         self.output_d = output_d  # for visualization
 
     def test_step(self, input_d, batch_idx):
-        self.common_step(TEST, input_d)
+        if self.cfg.vis_test:
+            self.output_d = self.common_step(TEST, input_d)
+            output_d = valmap(
+                lambda v: v.detach().cpu() if isinstance(v, torch.Tensor) else v,
+                self.output_d,
+            )
+            vis_function = getattr(self.net, f"visualize_{TEST.lower()}")
+            vis_output_d = vis_function(output_d)
+            for img_name, img in vis_output_d.items():
+                self.log_image_at_current_step(f"{TEST}/{img_name}", img, TEST, batch_idx)
+
+            del output_d, vis_output_d, self.output_d
+        else:
+            self.common_step(TEST, input_d)
 
     def common_step(self, mode, input_d):
         with autocast(device_type=self.device.type):
@@ -175,6 +188,8 @@ class Trainer(pl.LightningModule):
                 self.my_log(f"grad_norm/{name}", grad_norm(module, norm_type=2)["grad_2.0_norm_total"])
 
     def formulate_metric(self, net):
+        if self.cfg.vis_test or self.cfg.test_metric == None:
+            return
 
         _dice_mean_metric = lambda do_crop_based: Dice(
             num_classes=self.cfg.num_classes,
@@ -223,10 +238,15 @@ class Trainer(pl.LightningModule):
                         }
         return metrics
 
-    def log_image_at_current_step(self, txt, x):
-        return self.logger.experiment.add_image(
-            txt, x.permute(-1, 0, 1), self.current_epoch
-        )
+    def log_image_at_current_step(self, txt, x, mode = VALID, batch_idx = None):
+        if mode == VALID:
+            return self.logger.experiment.add_image(
+                txt, x.permute(-1, 0, 1), self.current_epoch
+            )
+        else:
+            return self.logger.experiment.add_image(
+                txt, x.permute(-1, 0, 1), batch_idx
+            )
 
     def my_log(self, name, val):
         return self.log(name, val, on_step=False, on_epoch=True, logger=True)
