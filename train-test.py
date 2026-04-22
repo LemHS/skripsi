@@ -106,7 +106,7 @@ class Trainer(pl.LightningModule):
                             otuput_d[pred_type + LAB],
                         )
 
-        if mode == TEST & (not self.cfg.vis_test):
+        if (mode == TEST) & (not self.cfg.vis_test):
             del otuput_d
             torch.cuda.empty_cache()
             gc.collect()
