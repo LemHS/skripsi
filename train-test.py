@@ -92,7 +92,7 @@ class Trainer(pl.LightningModule):
         for loss_name, loss_value in loss_d.items():
             self.my_log(f"{mode}/{loss_name}", loss_value)
 
-        if mode != TRAIN:
+        if (mode != TRAIN) & (not self.cfg.vis_test) & (self.cfg.test_metric is not None):
             for pred_type, metric_dict in self.metrics[mode].items():
                 for _, metric_fn in metric_dict.items():
                     if mode == TEST:
@@ -115,7 +115,7 @@ class Trainer(pl.LightningModule):
 
     def common_epoch_end(self, mode):
 
-        if mode != TRAIN:
+        if (mode != TRAIN) & (not self.cfg.vis_test) & (self.cfg.test_metric is not None):
             for pred_type, metric_dict in self.metrics[mode].items():
                 for metric_name, metric_fn in metric_dict.items():
                     for organ_name, metric_val in metric_fn.compute().items():
