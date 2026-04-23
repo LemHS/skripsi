@@ -715,7 +715,7 @@ class DAGCUNit(nn.Module):
     def _cosine_similarity_matrix(self, feature_map: torch.Tensor, threshold: float) -> torch.Tensor:
         b, c, d, h, w = feature_map.shape
         flattened = feature_map.view(b, c, d * h * w)
-        flattened_norm = F.normalize(flattened, p=2, dim=1)
+        flattened_norm = F.normalize(flattened, p=2, dim=-1)
         cosine_sim = torch.matmul(flattened, flattened_norm.transpose(1, 2))
         upper_triangular = torch.triu(cosine_sim, diagonal=1)
         mask = (upper_triangular < threshold).float()
