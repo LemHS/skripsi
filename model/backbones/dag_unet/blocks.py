@@ -355,10 +355,10 @@ class AxialDWConv(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         with record_function("AxialDWConv"):
-            conv_d = self.conv_d(x)
-            conv_h = self.conv_h(x)
-            conv_w = self.conv_w(x)
-            conv = x + conv_h + conv_w + conv_d
+            conv = x
+            conv += self.conv_d(x)
+            conv += self.conv_h(x)
+            conv += self.conv_w(x)
             if hasattr(self, "adn"):
                 return self.adn(conv)
         return conv
