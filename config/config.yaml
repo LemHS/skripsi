@@ -36,5 +36,6 @@ do_vis: true
 profile_debug: false
 test_metric: "dsc"
 vis_test: false
+memory: false
 
 kaggle: false
