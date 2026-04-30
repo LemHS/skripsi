@@ -80,8 +80,16 @@ class Trainer(pl.LightningModule):
             self.common_step(TEST, input_d)
 
     def common_step(self, mode, input_d):
+        if (mode == TEST) and self.cfg.memory:
+            torch.cuda.reset_peak_memory_stats()
+            self.my_log(f"{TEST}/mem_before", torch.cuda.memory_allocated() / 1024**2, on_step=True)
+
         with autocast(device_type=self.device.type):
             otuput_d = getattr(self.net, f"{mode.lower()}_step")(input_d)
+
+        if (mode == TEST) and self.cfg.memory:
+            self.my_log(f"{TEST}/mem_after", torch.cuda.memory_allocated() / 1024**2, on_step=True)
+            self.my_log(f"{TEST}/mem_peak", torch.cuda.max_memory_allocated() / 1024**2, on_step=True)
 
         otuput_d = {
             k: v.float() if isinstance(v, torch.Tensor) else v
@@ -248,8 +256,8 @@ class Trainer(pl.LightningModule):
                 txt, x.permute(-1, 0, 1), batch_idx
             )
 
-    def my_log(self, name, val):
-        return self.log(name, val, on_step=False, on_epoch=True, logger=True)
+    def my_log(self, name, val, on_step=False):
+        return self.log(name, val, on_step=on_step, on_epoch=not on_step, logger=True)
 
 
 @hydra.main(config_path="config", config_name="config")
