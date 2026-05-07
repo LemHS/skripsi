@@ -101,7 +101,8 @@ class MedNeXtBlock(nn.Module):
             elif self.dim == "2d":
                 gx = torch.norm(x1, p=2, dim=(-2, -1), keepdim=True)
             gx = gx / (gx.mean(dim=1, keepdim=True) + 1e-6)
-            x1 = self.conv3(x1)
+            x1 = self.grn_gamma * (x1 * gx) + self.grn_beta + x1
+        x1 = self.conv3(x1)
         if self.do_res:
             x1 = x + x1
         return x1
