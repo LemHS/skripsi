@@ -90,7 +90,9 @@ class MedNeXtBlock(nn.Module):
 
         x1 = x
         x1 = self.conv1(x1)
-        x1 = self.act(self.conv2(self.norm(x1)))
+        x1 = self.norm(x1)
+        x1 = self.conv2(x1)
+        x1 = self.act(x1)
         if self.grn:
             # gamma, beta: learnable affine transform parameters
             # X: input of shape (N,C,H,W,D)
@@ -98,9 +100,8 @@ class MedNeXtBlock(nn.Module):
                 gx = torch.norm(x1, p=2, dim=(-3, -2, -1), keepdim=True)
             elif self.dim == "2d":
                 gx = torch.norm(x1, p=2, dim=(-2, -1), keepdim=True)
-            nx = gx / (gx.mean(dim=1, keepdim=True) + 1e-6)
-            x1 = self.grn_gamma * (x1 * nx) + self.grn_beta + x1
-        x1 = self.conv3(x1)
+            gx = gx / (gx.mean(dim=1, keepdim=True) + 1e-6)
+            x1 = self.conv3(x1)
         if self.do_res:
             x1 = x + x1
         return x1
@@ -160,8 +161,9 @@ class MedNeXtDownBlock(MedNeXtBlock):
         x1 = super().forward(x)
 
         if self.resample_do_res:
-            res = self.res_conv(x)
-            x1 = x1 + res
+            x1 = x1 + self.res_conv(x)
+        else:
+            del x
 
         return x1
 
@@ -217,22 +219,17 @@ class MedNeXtUpBlock(MedNeXtBlock):
         )
 
     def forward(self, x, dummy_tensor=None):
+        pad = (1, 0, 1, 0) if self.dim == "2d" else (1, 0, 1, 0, 1, 0)
 
         x1 = super().forward(x)
         # Asymmetry but necessary to match shape
 
-        if self.dim == "2d":
-            x1 = torch.nn.functional.pad(x1, (1, 0, 1, 0))
-        elif self.dim == "3d":
-            x1 = torch.nn.functional.pad(x1, (1, 0, 1, 0, 1, 0))
+        x1 = torch.nn.functional.pad(x1, pad)
 
         if self.resample_do_res:
             res = self.res_conv(x)
-            if self.dim == "2d":
-                res = torch.nn.functional.pad(res, (1, 0, 1, 0))
-            elif self.dim == "3d":
-                res = torch.nn.functional.pad(res, (1, 0, 1, 0, 1, 0))
-            x1 = x1 + res
+            del x
+            x1 = x1 + torch.nn.functional.pad(res, pad)
 
         return x1
 
@@ -275,10 +272,10 @@ class LayerNorm(nn.Module):
                 x, self.normalized_shape, self.weight, self.bias, self.eps
             )
         elif self.data_format == "channels_first":
-            u = x.mean(1, keepdim=True)
-            s = (x - u).pow(2).mean(1, keepdim=True)
-            x = (x - u) / torch.sqrt(s + self.eps)
-            x = self.weight[:, None, None, None] * x + self.bias[:, None, None, None]
+            x = x - x.mean(1, keepdim=True)
+            x = x / torch.sqrt(x.pow(2).mean(1, keepdim=True) + self.eps)
+            shape = [-1] + [1] * (x.dim() - 1)
+            x = self.weight.view(shape) * x + self.bias.view(shape)
             return x
 
 
