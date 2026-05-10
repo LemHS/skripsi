@@ -364,7 +364,7 @@ class BraTS2021(BraTS2021Dataset):
     data_dir = "BraTS/BraTS2021_TrainingSet"
     intensity_scale = [0.5, 99.5, 0.0, 1.0]
     spacing = [1.0, 1.0, 1.0]
-    local_roi_size = [96, 96, 96]
+    local_roi_size = [48, 48, 48]
     global_roi_size = [170, 192, 160]
     global_divisible_k = [16, 16, 16]
     global_downsize_rate = [2, 2, 2]
