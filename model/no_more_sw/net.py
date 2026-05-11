@@ -258,7 +258,7 @@ class NSWNet3D(nn.Module):
             self.feature_to_logit(pre_score)
         )
         # DEBUG
-        objectness_logit = torch.clip(objectness_logit, max=70)
+        objectness_logit = torch.clip(objectness_logit, min=-70, max=70)
 
         background_mask: TensorType["B", "1", "Hz", "Wz", "Dz"] = (
             self.get_background_mask(global_segmentation_logit)
