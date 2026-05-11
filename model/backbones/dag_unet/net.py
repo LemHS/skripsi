@@ -275,9 +275,9 @@ class Decoder(nn.Module):
         x0, x1, x2, x3, x4 = features
 
         u3 = self.up_0(x4, x3)
-        u2 = self.up_0(u3, x2)
-        u1 = self.up_1(u2, x1)
-        u0 = self.up_2(u1, x0)
+        u2 = self.up_1(u3, x2)
+        u1 = self.up_2(u2, x1)
+        u0 = self.up_3(u1, x0)
         logit = self.top_conv(u0)
         return [*features, u3, u2, u1, u0, logit]
 
