@@ -366,9 +366,8 @@ class NSWNet3D(nn.Module):
                     )
             else:
                 lab_cpu = sampled_patches_d[LAB].cpu()
-                print("label unique:", lab_cpu.unique())
-                print("label min/max:", lab_cpu.min().item(), lab_cpu.max().item())
-                print("num_classes:", self.local_output_shape[0])
+                if torch.isnan(lab_cpu.min().item()) or torch.isnan(lab_cpu.max().item()):
+                    return None
                 local_loss: int = self.local_backbone.get_loss(
                     sampled_patches_logits,
                     sampled_patches_d[LAB],
