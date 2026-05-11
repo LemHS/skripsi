@@ -369,6 +369,8 @@ class NSWNet3D(nn.Module):
                     sampled_patches_logits,
                     sampled_patches_d[LAB],
                 )
+                print(sampled_patches_d[LAB].unique())
+                print("num_classes:", self.local_output_shape[0])
             agg_loss: int = self.agg_loss_fn(
                 aggregated_logit,
                 input_d[LAB],
