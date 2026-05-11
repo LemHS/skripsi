@@ -117,9 +117,8 @@ class GumbelTopK(nn.Module):
         )
 
     def get_gumbel_noise(self, shape):
-        return -torch.log(
-            -torch.log(torch.rand(shape, device=self.cur_device) + 1e-20) + 1e-20
-        )
+        u = torch.rand(shape, device=self.cur_device).clamp(1e-6, 1 - 1e-6)
+        return -torch.log(-torch.log(u))
 
 
 if __name__ == "__main__":
