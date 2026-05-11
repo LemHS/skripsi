@@ -58,6 +58,7 @@ class Trainer(pl.LightningModule):
     def training_step(self, input_d, _):
         output_d = self.common_step(TRAIN, input_d)
         if output_d is None:
+            print(_)
             return None
         return output_d[TOTAL_LOSS]
 
