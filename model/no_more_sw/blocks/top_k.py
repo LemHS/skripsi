@@ -74,10 +74,10 @@ class GumbelTopK(nn.Module):
                 )
 
             # prev onehot has large negative value
-            noisy_logits = noisy_logits + torch.log(mask)
+            masked_logits = noisy_logits + torch.log(mask)
 
             # during softmax, large negative value maps to a value close to 0.
-            onehot_approx = torch.nn.functional.softmax(noisy_logits / self.tau, dim=1)
+            onehot_approx = torch.nn.functional.softmax(masked_logits / self.tau, dim=1)
             soft_one_hots.append(onehot_approx)
 
         # DEBUG
