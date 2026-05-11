@@ -365,15 +365,14 @@ class NSWNet3D(nn.Module):
                         sampled_patches_d[LAB],
                     )
             else:
-                try:
-                    local_loss: int = self.local_backbone.get_loss(
-                        sampled_patches_logits,
-                        sampled_patches_d[LAB],
-                    )
-                except Exception as e:
-                    print(sampled_patches_d[LAB].unique())
-                    print("num_classes:", self.local_output_shape[0])
-                    raise
+                lab_cpu = sampled_patches_d[LAB].cpu()
+                print("label unique:", lab_cpu.unique())
+                print("label min/max:", lab_cpu.min().item(), lab_cpu.max().item())
+                print("num_classes:", self.local_output_shape[0])
+                local_loss: int = self.local_backbone.get_loss(
+                    sampled_patches_logits,
+                    sampled_patches_d[LAB],
+                )
             agg_loss: int = self.agg_loss_fn(
                 aggregated_logit,
                 input_d[LAB],
