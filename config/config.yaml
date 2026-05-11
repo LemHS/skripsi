@@ -30,6 +30,7 @@ log_base_path: "logs"
 ckpt_base_path: "ckpts" 
 test_only: false
 ckpt_path : null
+save_top_k: 1
 
 # additional
 do_vis: true

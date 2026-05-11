@@ -57,6 +57,8 @@ class Trainer(pl.LightningModule):
 
     def training_step(self, input_d, _):
         output_d = self.common_step(TRAIN, input_d)
+        if output_d is None:
+            return None
         return output_d[TOTAL_LOSS]
 
     def validation_step(self, input_d, batch_idx):
@@ -86,6 +88,8 @@ class Trainer(pl.LightningModule):
 
         with autocast(device_type=self.device.type):
             otuput_d = getattr(self.net, f"{mode.lower()}_step")(input_d)
+            if otuput_d is None:
+                return otuput_d
 
         if (mode == TEST) and self.cfg.memory:
             self.my_log(f"{TEST}/mem_after", torch.cuda.memory_allocated() / 1024**2, on_step=True)
@@ -365,7 +369,7 @@ def main(cfg: DictConfig):
         dirpath=f"{cfg.ckpt_base_path}",
         filename=ckpt_name,
         monitor=(f"{VALID}/{TOTAL_LOSS}"),
-        save_top_k=1,
+        save_top_k=cfg.save_top_k,
         save_last=True,
         verbose=True,
         mode="min",
