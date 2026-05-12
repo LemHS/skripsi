@@ -198,7 +198,9 @@ class Trainer(pl.LightningModule):
         ]
         for name, module in self.named_modules():
             if len(list(module.parameters())) > 0 and name in track_grad_modules:
-                self.my_log(f"grad_norm/{name}", grad_norm(module, norm_type=2)["grad_2.0_norm_total"])
+                norms = grad_norm(module, norm_type=2)
+                if "grad_2.0_norm_total" in norms:
+                    self.my_log(f"grad_norm/{name}", norms["grad_2.0_norm_total"])
 
     def formulate_metric(self, net):
         if self.cfg.vis_test or (self.cfg.test_metric == None):
