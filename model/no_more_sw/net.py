@@ -38,6 +38,12 @@ def freeze(model):
 
     return model
 
+def check_nan(name, tensor):
+    if torch.isnan(tensor).any():
+        print(f"NaN detected in {name}! shape={tensor.shape}, min={tensor.min().item():.4f}, max={tensor.max().item():.4f}")
+    else:
+        print(f"{name}: min={tensor.min().item():.4f}, max={tensor.max().item():.4f}")
+
 
 @model_registry.register
 class NSWNet3D(nn.Module):
@@ -257,12 +263,16 @@ class NSWNet3D(nn.Module):
         objectness_logit: TensorType["B", "1", "Hz", "Wz", "Dz"] = (
             self.feature_to_logit(pre_score)
         )
+        check_nan("objectness_logit", objectness_logit)
         # DEBUG
         objectness_logit = torch.clip(objectness_logit, min=-70, max=70)
+        check_nan("objectness_logit", objectness_logit)
 
         background_mask: TensorType["B", "1", "Hz", "Wz", "Dz"] = (
             self.get_background_mask(global_segmentation_logit)
         )
+
+        check_nan("background_mask", background_mask)
         sampled_topk_local_patches_d, sample_logit, slice_meta = self.sample_topk_patch(
             raw_input_d,
             objectness_logit,
