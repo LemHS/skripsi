@@ -403,6 +403,7 @@ class NSWNet3D(nn.Module):
                 + (0 if freeze_local else local_loss)
                 - (entropy * self.entropy_multiplier)
             )
+            print(f"agg_loss={agg_loss.item():.4f}, global_loss={global_loss.item():.4f}, local_loss={local_loss.item():.4f}, entropy={entropy.item():.4f}, total={total_loss.item():.4f}")
 
             # DEBUG
             return output_d | {
