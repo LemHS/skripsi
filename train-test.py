@@ -57,9 +57,6 @@ class Trainer(pl.LightningModule):
 
     def training_step(self, input_d, _):
         output_d = self.common_step(TRAIN, input_d)
-        if output_d is None:
-            print(_)
-            return None
         return output_d[TOTAL_LOSS]
 
     def validation_step(self, input_d, batch_idx):
@@ -89,8 +86,6 @@ class Trainer(pl.LightningModule):
 
         with autocast(device_type=self.device.type):
             otuput_d = getattr(self.net, f"{mode.lower()}_step")(input_d)
-            if otuput_d is None:
-                return otuput_d
 
         if (mode == TEST) and self.cfg.memory:
             self.my_log(f"{TEST}/mem_after", torch.cuda.memory_allocated() / 1024**2, on_step=True)
@@ -198,9 +193,7 @@ class Trainer(pl.LightningModule):
         ]
         for name, module in self.named_modules():
             if len(list(module.parameters())) > 0 and name in track_grad_modules:
-                norms = grad_norm(module, norm_type=2)
-                if "grad_2.0_norm_total" in norms:
-                    self.my_log(f"grad_norm/{name}", norms["grad_2.0_norm_total"])
+                self.my_log(f"grad_norm/{name}", grad_norm(module, norm_type=2)["grad_2.0_norm_total"])
 
     def formulate_metric(self, net):
         if self.cfg.vis_test or (self.cfg.test_metric == None):
