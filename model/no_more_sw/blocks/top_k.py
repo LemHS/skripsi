@@ -12,6 +12,12 @@ import numpy as np
 import torch
 from torch import nn
 
+def check_nan(name, tensor):
+    if torch.isnan(tensor).any():
+        print(f"NaN detected in {name}! shape={tensor.shape}, min={tensor.min().item():.4f}, max={tensor.max().item():.4f}")
+    else:
+        print(f"{name}: min={tensor.min().item():.4f}, max={tensor.max().item():.4f}")
+
 
 class GumbelTopK(nn.Module):
 
@@ -44,11 +50,13 @@ class GumbelTopK(nn.Module):
         flatten_logits = logits.flatten(1)
         # log_p = self.logSoftmax(flatten_logits)
         log_p = flatten_logits
+        check_nan("log_p", log_p)
 
         # sample soft topk
         soft_one_hots = []
         onehot_approx = torch.zeros_like(log_p, device=cur_device)
         noisy_logits = log_p + self.get_gumbel_noise(log_p.shape)
+        check_nan("noisy_logits", noisy_logits)
 
         for i in range(k):
             if i == 0:
@@ -75,9 +83,11 @@ class GumbelTopK(nn.Module):
 
             # prev onehot has large negative value
             masked_logits = noisy_logits + torch.log(mask)
+            check_nan("masked_logits", masked_logits)
 
             # during softmax, large negative value maps to a value close to 0.
             onehot_approx = torch.nn.functional.softmax(masked_logits / self.tau, dim=1)
+            check_nan("onehot_approx", onehot_approx)
             soft_one_hots.append(onehot_approx)
 
         # DEBUG
