@@ -253,9 +253,11 @@ class NSWNet3D(nn.Module):
         global_segmentation_logit: TensorType["B", "1", "Hg", "Wg", "Dg"] = (
             global_features[-1]
         )
+        check_nan("global_segmentation_logit", global_segmentation_logit)
 
         # 2nd last
         pre_score = global_features[-2]
+        check_nan("pre_score", pre_score)
         # print(f"pre_score:{pre_score.shape}")
 
         # print(last(global_features).shape)
