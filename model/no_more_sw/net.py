@@ -253,11 +253,11 @@ class NSWNet3D(nn.Module):
         global_segmentation_logit: TensorType["B", "1", "Hg", "Wg", "Dg"] = (
             global_features[-1]
         )
-        check_nan("global_segmentation_logit", global_segmentation_logit)
+        # check_nan("global_segmentation_logit", global_segmentation_logit)
 
         # 2nd last
         pre_score = global_features[-2]
-        check_nan("pre_score", pre_score)
+        # check_nan("pre_score", pre_score)
         # print(f"pre_score:{pre_score.shape}")
 
         # print(last(global_features).shape)
@@ -265,16 +265,16 @@ class NSWNet3D(nn.Module):
         objectness_logit: TensorType["B", "1", "Hz", "Wz", "Dz"] = (
             self.feature_to_logit(pre_score)
         )
-        check_nan("objectness_logit", objectness_logit)
+        # check_nan("objectness_logit", objectness_logit)
         # DEBUG
         objectness_logit = torch.clip(objectness_logit, min=-70, max=70)
-        check_nan("objectness_logit", objectness_logit)
+        # check_nan("objectness_logit", objectness_logit)
 
         background_mask: TensorType["B", "1", "Hz", "Wz", "Dz"] = (
             self.get_background_mask(global_segmentation_logit)
         )
 
-        check_nan("background_mask", background_mask)
+        # check_nan("background_mask", background_mask)
         sampled_topk_local_patches_d, sample_logit, slice_meta = self.sample_topk_patch(
             raw_input_d,
             objectness_logit,
@@ -403,7 +403,7 @@ class NSWNet3D(nn.Module):
                 + (0 if freeze_local else local_loss)
                 - (entropy * self.entropy_multiplier)
             )
-            print(f"agg_loss={agg_loss.item():.4f}, global_loss={global_loss.item():.4f}, local_loss={local_loss.item():.4f}, entropy={entropy.item():.4f}, total={total_loss.item():.4f}")
+            # print(f"agg_loss={agg_loss.item():.4f}, global_loss={global_loss.item():.4f}, local_loss={local_loss.item():.4f}, entropy={entropy.item():.4f}, total={total_loss.item():.4f}")
 
             # DEBUG
             return output_d | {

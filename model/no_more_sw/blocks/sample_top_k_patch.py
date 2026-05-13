@@ -88,11 +88,11 @@ class SampleTopKPatch(nn.Module):
         # background_mask is 1 if background else 0 (foreground)
         # log_mask is a large negative value if background_mask is 1 else 0
         log_mask = torch.log(torch.max(1.0 - background_mask, self.background_epsilon))
-        check_nan("log_mask", log_mask)
+        # check_nan("log_mask", log_mask)
 
         # paste logit with log_mask to prevent sampling from backgroud region
         masked_logit: TensorType["B", "1", "Hn", "Wn", "Dn"] = logit + log_mask
-        check_nan("masked_logit", masked_logit)
+        # check_nan("masked_logit", masked_logit)
 
         # sample one-hots from logit
         one_hots_flatten, soft_hots_flatten = self.get_top_k_sample(
