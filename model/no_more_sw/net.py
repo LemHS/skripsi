@@ -267,7 +267,7 @@ class NSWNet3D(nn.Module):
         )
         # check_nan("objectness_logit", objectness_logit)
         # DEBUG
-        objectness_logit = torch.clip(objectness_logit, min=-70, max=70)
+        objectness_logit = torch.clip(objectness_logit, max=70)
         # check_nan("objectness_logit", objectness_logit)
 
         background_mask: TensorType["B", "1", "Hz", "Wz", "Dz"] = (
