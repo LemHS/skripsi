@@ -82,7 +82,7 @@ class GumbelTopK(nn.Module):
                 )
 
             # prev onehot has large negative value
-            masked_logits = noisy_logits + torch.log(mask)
+            noisy_logits = noisy_logits + torch.log(mask)
             # check_nan("masked_logits", masked_logits)
 
             # during softmax, large negative value maps to a value close to 0.
