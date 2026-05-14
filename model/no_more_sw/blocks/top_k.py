@@ -86,7 +86,7 @@ class GumbelTopK(nn.Module):
             # check_nan("masked_logits", masked_logits)
 
             # during softmax, large negative value maps to a value close to 0.
-            onehot_approx = torch.nn.functional.softmax(masked_logits / self.tau, dim=1)
+            onehot_approx = torch.nn.functional.softmax(noisy_logits / self.tau, dim=1)
             # check_nan("onehot_approx", onehot_approx)
             soft_one_hots.append(onehot_approx)
 
