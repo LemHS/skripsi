@@ -402,6 +402,7 @@ def main(cfg: DictConfig):
     profiler = PyTorchProfiler(
         on_trace_ready=torch.profiler.tensorboard_trace_handler("logs/profiler0"),
         schedule=torch.profiler.schedule(skip_first=10, wait=1, warmup=1, active=5),
+        profile_memory=True
     )
 
     # init model and trainer
