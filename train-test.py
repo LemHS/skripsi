@@ -37,7 +37,7 @@ def combined_trace_handler(dir_name: str):
 
     def handler_fn(prof: profile):
         tb_handler(prof)
-        prof.export_memory_timeline(mem_file)
+        torch.cuda.memory._dump_snapshot(mem_file)
 
     return handler_fn
 
@@ -454,11 +454,15 @@ def main(cfg: DictConfig):
             ckpt_path=cfg.ckpt_path,
         )
     else:
+        if cfg.profile_debug:
+            torch.cuda.memory._record_memory_history(max_entries=100000)
         trainer.test(
             model,
             [test_loader],
             ckpt_path=cfg.ckpt_path,
         )
+        if cfg.profile_debug:
+            torch.cuda.memory._record_memory_history(enabled=None)
 
 if __name__ == "__main__":
 
