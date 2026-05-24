@@ -9,6 +9,7 @@ from toolz.curried.operator import *
 
 import torch
 from torch import autocast
+from torch.profiler import tensorboard_trace_handler, profile
 
 import lightning as pl
 from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
@@ -29,6 +30,16 @@ from data.registry import data_registry
 from model.registry import model_registry
 from model.no_more_sw.blocks.custom_callbacks import ReducingTau, StopAtEpoch, EarlyStoppingWithWarmup
 import gc
+
+def combined_trace_handler(dir_name: str):
+    tb_handler = torch.profiler.tensorboard_trace_handler(dir_name)
+    mem_file = f"{dir_name}/memory_timeline.html"
+
+    def handler_fn(prof: profile):
+        tb_handler(prof)
+        prof.export_memory_timeline(mem_file)
+
+    return handler_fn
 
 
 class Trainer(pl.LightningModule):
