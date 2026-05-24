@@ -33,7 +33,7 @@ import gc
 
 def combined_trace_handler(dir_name: str):
     tb_handler = torch.profiler.tensorboard_trace_handler(dir_name)
-    mem_file = f"{dir_name}/memory_timeline.html"
+    mem_file = f"{dir_name}/memory_timeline.json"
 
     def handler_fn(prof: profile):
         tb_handler(prof)
