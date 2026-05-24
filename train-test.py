@@ -413,7 +413,9 @@ def main(cfg: DictConfig):
     profiler = PyTorchProfiler(
         on_trace_ready=combined_trace_handler("logs/profiler0"),
         schedule=torch.profiler.schedule(skip_first=10, wait=1, warmup=1, active=5),
-        profile_memory=True
+        profile_memory=True,
+        record_shapes=True,
+        with_stack=True
     )
 
     # init model and trainer
