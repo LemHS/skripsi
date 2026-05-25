@@ -31,7 +31,7 @@ from model.registry import model_registry
 from model.no_more_sw.blocks.custom_callbacks import ReducingTau, StopAtEpoch, EarlyStoppingWithWarmup
 import gc
 import time
-from fvcore.nn import FlopCountAnalysis
+from torchinfo import summary
 
 def combined_trace_handler(dir_name: str):
     tb_handler = torch.profiler.tensorboard_trace_handler(dir_name)
@@ -103,8 +103,8 @@ class Trainer(pl.LightningModule):
             t_start = time.perf_counter()
 
         if self.cfg.flops:
-            flops = FlopCountAnalysis(self.net, input_d)
-            self.my_log(f"{mode}/flops_G", flops.total() / 1e9, on_step=True)
+            model_stats = summary(self.net, input_data=input_d, verbose=0)
+            self.my_log(f"{mode}/flops_G", model_stats.total_mult_adds / 1e9, on_step=True)
 
         with autocast(device_type=self.device.type):
             otuput_d = getattr(self.net, f"{mode.lower()}_step")(input_d)
