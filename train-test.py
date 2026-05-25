@@ -103,17 +103,38 @@ class Trainer(pl.LightningModule):
             t_start = time.perf_counter()
 
         if self.cfg.flops and not hasattr(self, '_flops_logged'):
-            with torch.profiler.profile(
-                activities=[torch.profiler.ProfilerActivity.CUDA],
-                with_flops=True,
-            ) as prof:
-                with autocast(device_type=self.device.type):
-                    getattr(self.net, f"{mode.lower()}_step")(input_d)
-            
-            total_flops = sum(e.flops for e in prof.key_averages())
-            self.my_log(f"{mode}/flops_G", total_flops / 1e9, on_step=True)
+            from fvcore.nn import FlopCountAnalysis
+
+            gH, gW, gD = self.net.global_input_shape[1:]
+            pH, pW, pD = self.net.patch_size
+
+            dummy_global_vol = input_d[VOL][:1, :, :gH, :gW, :gD]
+            dummy_patch_vol  = input_d[VOL][:1, :, :pH, :pW, :pD]
+
+            with torch.no_grad():
+                global_features = self.net.global_backbone(dummy_global_vol)
+                local_features  = self.net.local_backbone(dummy_patch_vol)
+
+            global_flops = FlopCountAnalysis(self.net.global_backbone, dummy_global_vol).total()
+            f2l_flops    = FlopCountAnalysis(self.net.feature_to_logit, global_features[-2]).total()
+            local_flops  = FlopCountAnalysis(self.net.local_backbone,   dummy_patch_vol).total()
+
+            agg_flops = 0
+            if self.net.add_aggregation_module:
+                dummy_agg_input = torch.cat([local_features[-1], 
+                                            torch.zeros_like(local_features[-1])], dim=1)
+                agg_flops = FlopCountAnalysis(self.net.get_aggreated_logit.aggregate, dummy_agg_input).total()
+                agg_flops *= self.net.num_infernce_patches  # called once per patch
+
+            total_flops = global_flops + f2l_flops + (local_flops * self.net.num_infernce_patches) + agg_flops
+
+            self.my_log(f"{mode}/flops_global_G", global_flops / 1e9, on_step=True)
+            self.my_log(f"{mode}/flops_f2l_G",    f2l_flops    / 1e9, on_step=True)
+            self.my_log(f"{mode}/flops_local_G",  local_flops  / 1e9, on_step=True)
+            self.my_log(f"{mode}/flops_agg_G",    agg_flops    / 1e9, on_step=True)
+            self.my_log(f"{mode}/flops_total_G",  total_flops  / 1e9, on_step=True)
             self._flops_logged = True
-        
+
         with autocast(device_type=self.device.type):
             otuput_d = getattr(self.net, f"{mode.lower()}_step")(input_d)
 

@@ -731,7 +731,13 @@ class DAGCUNit(nn.Module):
         top_indices = torch.topk(x_similar, num_select, largest=True, sorted=False, dim=1).indices
         all_indices = torch.arange(c).unsqueeze(0).expand(b, -1).to(x.device)
 
-        selected_mask = torch.zeros_like(all_indices, dtype=torch.bool).scatter_(1, top_indices, True)
+        selected_mask = (
+            torch.arange(c, device=x.device)
+            .unsqueeze(0)                          # (1, C)
+            .unsqueeze(2)                          # (1, C, 1)
+            .eq(top_indices.unsqueeze(1))          # (B, C, num_select)
+            .any(dim=2)                            # (B, C)
+        )
 
         selected_channels = x[selected_mask].view(b, num_select, d, h, w)
         unselected_channels = x[~selected_mask].view(b, c - num_select, d, h, w)
