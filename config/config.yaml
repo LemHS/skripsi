@@ -38,5 +38,7 @@ profile_debug: false
 test_metric: "dsc"
 vis_test: false
 memory: false
+speed: false
+flops: false
 
 kaggle: false
