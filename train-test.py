@@ -30,6 +30,8 @@ from data.registry import data_registry
 from model.registry import model_registry
 from model.no_more_sw.blocks.custom_callbacks import ReducingTau, StopAtEpoch, EarlyStoppingWithWarmup
 import gc
+import time
+from fvcore.nn import FlopCountAnalysis
 
 def combined_trace_handler(dir_name: str):
     tb_handler = torch.profiler.tensorboard_trace_handler(dir_name)
@@ -94,9 +96,24 @@ class Trainer(pl.LightningModule):
         if (mode == TEST) and self.cfg.memory:
             torch.cuda.reset_peak_memory_stats()
             self.my_log(f"{TEST}/mem_before", torch.cuda.memory_allocated() / 1024**2, on_step=True)
+        
+        if (mode == TEST) and self.cfg.speed:
+            if self.device.type == 'cuda':
+                torch.cuda.synchronize()
+            t_start = time.perf_counter()
+
+        if self.cfg.flops:
+            flops = FlopCountAnalysis(self.net, input_d)
+            self.my_log(f"{mode}/flops_G", flops.total() / 1e9, on_step=True)
 
         with autocast(device_type=self.device.type):
             otuput_d = getattr(self.net, f"{mode.lower()}_step")(input_d)
+
+        if (mode == TEST) and self.cfg.speed:
+            if self.device.type == 'cuda':
+                torch.cuda.synchronize()
+            elapsed = time.perf_counter() - t_start
+            self.my_log(f"{mode}/step_time_s", elapsed, on_step=True)
 
         if (mode == TEST) and self.cfg.memory:
             self.my_log(f"{TEST}/mem_after", torch.cuda.memory_allocated() / 1024**2, on_step=True)
