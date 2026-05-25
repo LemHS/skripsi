@@ -345,7 +345,7 @@ def main(cfg: DictConfig):
 
     test_loader = NSWDataLoader(
         dataset=test_dataset,
-        iteration_per_epoch=None,  # We use the full test dataset
+        iteration_per_epoch=cfg.val_iteration_per_epoch,  # We use the full test dataset
         num_workers=cfg.num_workers,
         batch_size=1,
     )
