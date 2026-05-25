@@ -579,7 +579,7 @@ class MedNeXtSmall(MedNeXt):
             input_shape=input_shape,
             output_shape=output_shape,
             n_channels=32,
-            exp_r=[2, 2, 2, 2, 2, 2, 2, 2, 2],
+            exp_r=[1, 1, 1, 1, 1, 1, 1, 1, 1],
             kernel_size=3,
             do_res=True,
             do_res_up_down=True,
