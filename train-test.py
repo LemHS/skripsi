@@ -262,7 +262,7 @@ class Trainer(pl.LightningModule):
                 self.my_log(f"grad_norm/{name}", grad_norm(module, norm_type=2)["grad_2.0_norm_total"])
 
     def formulate_metric(self, net):
-        if self.cfg.vis_test or (self.cfg.test_metric == None):
+        if self.cfg.test_metric == None:
             return
 
         _dice_mean_metric = lambda do_crop_based: Dice(
