@@ -165,7 +165,7 @@ class Trainer(pl.LightningModule):
                             otuput_d[pred_type + LOGIT]
                         )
                         metric_fn.update(processed_logit, otuput_d[pred_type + LAB])
-                        if self.cfg.pred:
+                        if self.cfg.vis_test:
                             for organ_name, metric_val in metric_fn.compute_step().items():
                                 if pred_type == "":
                                     pred_type = "full"
