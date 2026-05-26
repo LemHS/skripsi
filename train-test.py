@@ -167,13 +167,12 @@ class Trainer(pl.LightningModule):
                         metric_fn.update(processed_logit, otuput_d[pred_type + LAB])
                         if self.cfg.vis_test:
                             for organ_name, metric_val in metric_fn.compute_step().items():
-                                print(1)
                                 if pred_type == "":
                                     log_pred_type = "full"
                                 else:
                                     log_pred_type = pred_type.rstrip("_")
-                                self.log(
-                                    f"{mode}/{log_pred_type}/{metric_name}/{organ_name}", metric_val
+                                self.my_log(
+                                    f"{mode}/{log_pred_type}/{metric_name}/{organ_name}", metric_val, on_step=True
                                 )
                     else:
                         metric_fn.update(
