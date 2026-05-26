@@ -330,10 +330,10 @@ class NSWNet3D(nn.Module):
         if mode == TEST:
             # simulate per-patch inference for fair comparison with sliding_window
             # also use less memory
-            sampled_topk_patch_logits = [
+            sampled_topk_patch_logits = list_data_collate([
                 self.local_backbone(sampled_topk_local_vol[None])[-1]
                 for sampled_topk_local_vol in sampled_topk_local_patches_d[VOL]
-            ]
+            ])
 
         #############AGGREGATION###############
         aggregated_logit = self.get_aggreated_logit(
