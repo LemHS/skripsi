@@ -451,16 +451,16 @@ class NSWNet3D(nn.Module):
             lab=input_d[GLOBAL_LOGIT].argmax(1, keepdim=True),
         )
 
-        if not mode == TEST:
-            # vis local
-            vis_local_lab = self.vis.vis(
-                vol=input_d[PATCH_VOL],
-                lab=input_d[PATCH_LAB],
-            )
-            vis_local_pred = self.vis.vis(
-                vol=input_d[PATCH_VOL],
-                lab=input_d[PATCH_LOGIT].argmax(1, keepdim=True),
-            )
+
+        # vis local
+        vis_local_lab = self.vis.vis(
+            vol=input_d[PATCH_VOL],
+            lab=input_d[PATCH_LAB],
+        )
+        vis_local_pred = self.vis.vis(
+            vol=input_d[PATCH_VOL],
+            lab=input_d[PATCH_LOGIT].argmax(1, keepdim=True),
+        )
 
         # vis agg
         vis_lab = self.vis.vis(
