@@ -121,7 +121,7 @@ class Dice(Metric):
 
         if self.average == "none":
             return (
-                dict(zip(self.label_keys, score.tolist()))
+                dict(zip(self.label_keys, score.squeeze().tolist()))
                 if self.label_keys != [None]
                 else score
             )
@@ -129,7 +129,7 @@ class Dice(Metric):
             return {"mean": score.nanmean()}
         
         if self.average == "all":
-            class_score = dict(zip([f"mean_{o}" for o in self.label_keys], score.tolist()))
+            class_score = dict(zip([f"mean_{o}" for o in self.label_keys], score.squeeze().tolist()))
             mean_score = {"mean": score.nanmean()}
             return merge(class_score, mean_score)
 
