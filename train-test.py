@@ -159,12 +159,21 @@ class Trainer(pl.LightningModule):
 
         if (mode != TRAIN) & (not self.cfg.vis_test) & (self.cfg.test_metric is not None):
             for pred_type, metric_dict in self.metrics[mode].items():
-                for _, metric_fn in metric_dict.items():
+                for metric_name, metric_fn in metric_dict.items():
                     if mode == TEST:
                         processed_logit = self.post_process_logit(
                             otuput_d[pred_type + LOGIT]
                         )
                         metric_fn.update(processed_logit, otuput_d[pred_type + LAB])
+                        if self.cfg.pred:
+                            for organ_name, metric_val in metric_fn.compute_step().items():
+                                if pred_type == "":
+                                    pred_type = "full"
+                                else:
+                                    pred_type = pred_type.rstrip("_")
+                                self.log(
+                                    f"{mode}/{pred_type}/{metric_name}/{organ_name}", metric_val
+                                )
                     else:
                         metric_fn.update(
                             otuput_d[pred_type + LOGIT],
