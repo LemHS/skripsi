@@ -157,7 +157,7 @@ class Trainer(pl.LightningModule):
         for loss_name, loss_value in loss_d.items():
             self.my_log(f"{mode}/{loss_name}", loss_value)
 
-        if (mode != TRAIN) & (not self.cfg.vis_test) & (self.cfg.test_metric is not None):
+        if (mode != TRAIN) & (self.cfg.test_metric is not None):
             for pred_type, metric_dict in self.metrics[mode].items():
                 for metric_name, metric_fn in metric_dict.items():
                     if mode == TEST:
@@ -166,9 +166,7 @@ class Trainer(pl.LightningModule):
                         )
                         metric_fn.update(processed_logit, otuput_d[pred_type + LAB])
                         if self.cfg.vis_test:
-                            print(1)
                             for organ_name, metric_val in metric_fn.compute_step().items():
-                                print(2)
                                 if pred_type == "":
                                     pred_type = "full"
                                 else:
