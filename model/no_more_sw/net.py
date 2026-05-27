@@ -442,7 +442,7 @@ class NSWNet3D(nn.Module):
     def visualize(self, input_d, mode):
 
         vis_vol = self.vis.vis(
-            vol=input_d["VOL"]
+            vol=input_d[VOL]
         )
 
         # vis global
