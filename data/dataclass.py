@@ -212,7 +212,7 @@ class DecathlonNSWDataset(DecathlonDataset):
             **kwargs,
         )
 
-class BraTS2021Dataset(Dataset):
+class BraTS2021Dataset(PersistentDataset):
     dataset_name: str
     global_downsize_rate: list[int]
     local_roi_size: list[int]
@@ -233,7 +233,7 @@ class BraTS2021Dataset(Dataset):
 
     transform = None
     root_dir: Path = Path(__file__).resolve().parent
-    # cache_dir_name: str = "persistent_cache"
+    cache_dir_name: str = "persistent_cache"
     vol_key: str = ["t1", "t1ce", "t2", "flair"]
     lab_key: str = "seg"
     source_key: str = "flair"
@@ -247,14 +247,14 @@ class BraTS2021Dataset(Dataset):
         rand_aug_type: str = ["none", "light", "heavy"][-1],
         root_dir: str | Path = None,
         data_dir: str = None,
-        # cache_dir_name: str = None,
+        cache_dir_name: str = None,
         json_dir: str = None,
     ):
         self.mode = mode
         self.rand_aug_type = rand_aug_type
         self.root_dir = Path(root_dir) if root_dir is not None else self.root_dir
         self.data_dir = data_dir if data_dir is not None else self.data_dir
-        # self.cache_dir_name = cache_dir_name if cache_dir_name is not None else self.cache_dir_name
+        self.cache_dir_name = cache_dir_name if cache_dir_name is not None else self.cache_dir_name
         self.json_dir = json_dir if json_dir is not None else os.path.join(self.root_dir / "datasets/", self.data_dir, self.dataset_json_filename)
 
         assert mode in [TRAIN, VALID, TEST], "mode must be 'train', 'valid', or 'test'"
@@ -289,11 +289,9 @@ class BraTS2021Dataset(Dataset):
             source=self.source_key,
         )
 
-        # cache_dir = self.root_dir / self.cache_dir_name / f"{self.__class__.__name__}_{mode}"
+        cache_dir = self.root_dir / self.cache_dir_name / f"{self.__class__.__name__}_{mode}"
 
-        super().__init__(self.datas, transform
-                        #  , cache_dir=cache_dir
-                         )
+        super().__init__(self.datas, transform, cache_dir=cache_dir)
 
     def load_data_pair(self):
         if os.path.exists(self.json_dir):
