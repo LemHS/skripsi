@@ -273,6 +273,33 @@ class NSD(Metric):
             mean_std = {"std": nanstd(scores.nanmean(1), 0)}
 
             return merge(class_score, class_std, mean_score, mean_std)
+    
+    def compute_step(self) -> float:
+
+        score = self.scores[-1]
+
+        if self.average == "none":
+            return (
+                dict(zip(self.label_keys, score.squeeze().tolist()))
+                if self.label_keys != [None]
+                else score
+            )
+
+        if self.average == "mean":
+            return {"mean": score.nanmean()}
+
+        if self.average == "all":
+
+            class_score = dict(
+                zip(
+                    [f"mean_{o}" for o in self.label_keys],
+                    score.squeeze().tolist(),
+                )
+            )
+
+            mean_score = {"mean": score.nanmean()}
+
+            return merge(class_score, mean_score)
 
 
 if __name__ == "__main__":
