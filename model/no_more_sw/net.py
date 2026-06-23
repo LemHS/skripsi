@@ -441,69 +441,63 @@ class NSWNet3D(nn.Module):
     @torch.no_grad()
     def visualize(self, input_d, mode):
 
-        vis_vol = self.vis.vis(
-            vol=input_d[VOL]
+        # vis global
+        vis_global_lab = self.vis.vis(
+            vol=input_d[GLOBAL_VOL],
+            lab=input_d[GLOBAL_LAB],
+        )
+        vis_global_pred = self.vis.vis(
+            vol=input_d[GLOBAL_VOL],
+            lab=input_d[GLOBAL_LOGIT].argmax(1, keepdim=True),
         )
 
-        # vis global
-        # vis_global_lab = self.vis.vis(
-        #     vol=input_d[GLOBAL_VOL],
-        #     lab=input_d[GLOBAL_LAB],
-        # )
-        # vis_global_pred = self.vis.vis(
-        #     vol=input_d[GLOBAL_VOL],
-        #     lab=input_d[GLOBAL_LOGIT].argmax(1, keepdim=True),
-        # )
+        if not mode == TEST:
+            # vis local
+            vis_local_lab = self.vis.vis(
+                vol=input_d[PATCH_VOL],
+                lab=input_d[PATCH_LAB],
+            )
+            vis_local_pred = self.vis.vis(
+                vol=input_d[PATCH_VOL],
+                lab=input_d[PATCH_LOGIT].argmax(1, keepdim=True),
+            )
 
-        # if not mode == TEST:
-        #     # vis local
-        #     vis_local_lab = self.vis.vis(
-        #         vol=input_d[PATCH_VOL],
-        #         lab=input_d[PATCH_LAB],
-        #     )
-        #     vis_local_pred = self.vis.vis(
-        #         vol=input_d[PATCH_VOL],
-        #         lab=input_d[PATCH_LOGIT].argmax(1, keepdim=True),
-        #     )
+        # vis agg
+        vis_lab = self.vis.vis(
+            vol=input_d[VOL],
+            lab=input_d[LAB],
+        )
+        vis_pred = self.vis.vis(
+            vol=input_d[VOL],
+            lab=input_d[LOGIT].argmax(1, keepdim=True),
+        )
 
-        # # vis agg
-        # vis_lab = self.vis.vis(
-        #     vol=input_d[VOL],
-        #     lab=input_d[LAB],
-        # )
-        # vis_pred = self.vis.vis(
-        #     vol=input_d[VOL],
-        #     lab=input_d[LOGIT].argmax(1, keepdim=True),
-        # )
+        # # vis one_hot
+        num_patches = input_d[PATCH_VOL].shape[0]
+        one_hot_vis: TensorType["KB" "1", "Hg", "Wg", "Dg"] = torch.zeros(
+            num_patches, 1, *self.input_shape[1:]
+        )  # this is closer to the actual patch sampling location.
 
-        # # # vis one_hot
-        # num_patches = input_d[PATCH_VOL].shape[0]
-        # one_hot_vis: TensorType["KB" "1", "Hg", "Wg", "Dg"] = torch.zeros(
-        #     num_patches, 1, *self.input_shape[1:]
-        # )  # this is closer to the actual patch sampling location.
+        for i, patch in enumerate(input_d[PATCH_VOL]):
+            slices: list[slice] = eval(patch.meta["slice"])
+            one_hot_vis[[i] + slices] = 1
 
-        # for i, patch in enumerate(input_d[PATCH_VOL]):
-        #     slices: list[slice] = eval(patch.meta["slice"])
-        #     one_hot_vis[[i] + slices] = 1
+        one_hot_vis: TensorType["K*B", "1", "H", "W", "D"] = (
+            torch.nn.functional.interpolate(
+                one_hot_vis,
+                self.global_input_shape[1:],
+                mode="nearest",
+            )
+        )
 
-        # one_hot_vis: TensorType["K*B", "1", "H", "W", "D"] = (
-        #     torch.nn.functional.interpolate(
-        #         one_hot_vis,
-        #         self.global_input_shape[1:],
-        #         mode="nearest",
-        #     )
-        # )
+        vis_one_hot = self.vis.vis(
+            vol=torch.cat([input_d[GLOBAL_VOL]] * len(one_hot_vis)),
+            lab=one_hot_vis,
+        )
 
-        # vis_one_hot = self.vis.vis(
-        #     vol=torch.cat([input_d[GLOBAL_VOL]] * len(one_hot_vis)),
-        #     lab=one_hot_vis,
-        # )
-
-        # # vis probability
-        # prob: TensorType["B", "1", "*patch_shape"] = input_d["score"]
-        # vis_prob = self.vis.vis(vol=prob)
-
-        return {VOL: vis_vol}
+        # vis probability
+        prob: TensorType["B", "1", "*patch_shape"] = input_d["score"]
+        vis_prob = self.vis.vis(vol=prob)
 
         return merge(
             {

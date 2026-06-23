@@ -300,7 +300,14 @@ class Trainer(pl.LightningModule):
                         }
                     )
                 else:
-                    if self.cfg.test_metric == "dsc":
+                    if self.cfg.test_metric == "both":
+                        metrics[mode][key] = {
+                            "dice_mean": _dice_mean_metric(False),
+                            "dice_class": _dice_class_metric(False),
+                            "nsd_mean": _nsd_mean_metric(),
+                            "nsd_class": _nsd_class_metric(),
+                        }
+                    elif self.cfg.test_metric == "dsc":
                         metrics[mode][key] = {
                             "dice_mean": _dice_mean_metric(False),
                             "dice_class": _dice_class_metric(False),
