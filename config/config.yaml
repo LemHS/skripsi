@@ -40,5 +40,6 @@ vis_test: false
 memory: false
 speed: false
 flops: false
+matrix: true
 
 kaggle: false
