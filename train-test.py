@@ -179,6 +179,30 @@ class Trainer(pl.LightningModule):
                             otuput_d[pred_type + LOGIT],
                             otuput_d[pred_type + LAB],
                         )
+            if self.cfg.matrix:
+                pred = torch.argmax(otuput_d[LOGIT], dim=1)
+                gt = otuput_d[LAB]
+
+                # Remove channel dim if needed
+                if gt.ndim == pred.ndim + 1:
+                    gt = gt.squeeze(1)
+
+                pred = pred.view(-1)
+                gt = gt.view(-1)
+
+                # Count all (pred, actual) pairs
+                for actual in range(self.cfg.num_classes):
+                    for predicted in range(self.cfg.num_classes):
+                        count = (
+                            (gt == actual) &
+                            (pred == predicted)
+                        ).sum()
+
+                        self.my_log(
+                            f"{TEST}/cm/pred_{predicted}_actual_{actual}",
+                            count.float(),
+                            on_step=True
+                        )
 
         if (mode == TEST) & (not self.cfg.vis_test):
             del otuput_d
